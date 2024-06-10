@@ -8,7 +8,8 @@ const HeaderMenu = () => {
     return (
         <View style={{
             height: 50, flex: 1, flexDirection: 'row', backgroundColor: AppColor.Blue1, width: '100%',
-            maxHeight: 50, zIndex: 100, padding: 5, justifyContent: 'center', alignItems: 'center', marginBottom: 5
+            maxHeight: 50, zIndex: 100, padding: 5, justifyContent: 'center', alignItems: 'center',
+            marginBottom: 5, position: 'absolute'
         }}>
             <TextInput style={{
                 width: '80%', height: 40, borderRadius: 5, backgroundColor: AppColor.TextDark
