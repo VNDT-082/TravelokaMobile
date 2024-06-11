@@ -1,16 +1,18 @@
 import React, { ReactNode } from 'react'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { AppColor } from '../assets/AppColor';
-import { Buildings, ChartSquare, ElementEqual, MusicLibrary2, ProfileCircle, ReceiptEdit } from 'iconsax-react-native';
+import { Buildings, ElementEqual, ProfileCircle, ReceiptEdit } from 'iconsax-react-native';
 import { Text, View } from 'react-native';
 import HomeScreen from '../screens/home';
 import Profile from '../screens/profile';
 import TravelScreen from '../screens/travel';
 import CartScreen from '../screens/cart';
+import Login from '../screens/login';
 
 
 const TabNavigator = () => {
     const Tab = createBottomTabNavigator();
+
     return (
         <>
             <Tab.Navigator screenOptions={({ route }) => ({
@@ -58,6 +60,7 @@ const TabNavigator = () => {
                 <Tab.Screen name='Khách sạn' component={TravelScreen} />
                 <Tab.Screen name='Giỏ hàng' component={CartScreen} />
                 <Tab.Screen name='Cá nhân' component={Profile} />
+                {/* <Tab.Screen name='Login' component={Login} /> */}
             </Tab.Navigator>
             {/* <View style={{
                 position: 'absolute', bottom: 90, left: 0,

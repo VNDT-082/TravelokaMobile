@@ -1,7 +1,8 @@
+
 import { Star1 } from 'iconsax-react-native';
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
-import { Icon } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 interface IProps {
     star: number;
@@ -16,17 +17,26 @@ const Star: React.FC<IProps> = (props: IProps) => {
     };
 
     const starUI = [];
+    const styles = StyleSheet.create({
+        container: {
+            flexDirection: 'row',
+            alignItems: 'center',
+        },
+        starContainer: {
+            marginRight: 4,
+        },
+        starText: {
+            fontWeight: 'bold',
+            fontSize: size,
+        },
+    });
 
     if (star >= 1) {
         for (let i = 0; i < Math.floor(star); i++) {
             starUI.push(
                 <View key={i} style={[styles.starContainer, { width: size, height: size }]}>
-                    <Icon
-                        name='sc-telegram'
-                        type='evilicon'
-                        color='#517fa4'
-                    />
-                    <Star1 size="32" color="#dce775" variant="Bold" />
+                    <Icon name='star' size={size} color="#FFCC00" />
+
                 </View>
             );
         }
@@ -34,7 +44,7 @@ const Star: React.FC<IProps> = (props: IProps) => {
         if (checkStar(star)) {
             starUI.push(
                 <View key={starUI.length} style={[styles.starContainer, { width: size, height: size }]}>
-                    <Star1 size="32" color="#dce775" variant="Bulk" />
+                    <Icon name='star-half' size={size} color="#FFCC00" />
                 </View>
             );
         }
@@ -42,7 +52,7 @@ const Star: React.FC<IProps> = (props: IProps) => {
         starUI.push(
             <View key={0} style={[styles.starContainer, { width: size, height: size }]}>
                 <Text style={styles.starText}>0</Text>
-                <Star1 size="32" color="#dce775" variant="Outline" />
+                <Icon name='star-o' size={size} />
             </View>
         );
     }
@@ -54,18 +64,6 @@ const Star: React.FC<IProps> = (props: IProps) => {
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    starContainer: {
-        marginRight: 4,
-    },
-    starText: {
-        fontWeight: 'bold',
-        fontSize: 24,
-    },
-});
+
 
 export default Star;

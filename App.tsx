@@ -20,12 +20,11 @@ import {
 
 import {
   Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import TabNavigator from './src/navigators/TabNavigator';
+import { createStackNavigator } from '@react-navigation/stack';
+import Login from './src/screens/login';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -63,10 +62,23 @@ function App(): React.JSX.Element {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
-
+  const RootStack = createNativeStackNavigator();
   return (
     <NavigationContainer>
-      <TabNavigator />
+      <RootStack.Navigator>
+        <RootStack.Screen
+          name="Tabs"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
+        <RootStack.Screen
+          name="Login"
+          component={Login}
+          options={{ headerShown: false }}
+        />
+      </RootStack.Navigator>
+      {/* <TabNavigator /> */}
+
     </NavigationContainer>
   );
 }

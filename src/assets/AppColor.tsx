@@ -8,5 +8,6 @@ export const AppColor = {
     TextDark: '#EEEEEE',
     Orage: 'FF8A65',
     Gray01: '#EEEEEE',
-    Cyan: '#06BCEE'
+    Cyan: '#06BCEE',
+    Green21: '#66FF99'
 }

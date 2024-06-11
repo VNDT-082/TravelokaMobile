@@ -44,18 +44,18 @@ interface IHotel {
 
 
 interface IResponeCardHotel {
-  hotels:ICardHotel[]
+  hotels: ICardHotel[]
 }
 
 interface ICardHotel {
-    id: string;
-    Name: string;
-    Address: string;
-    FileName: string;
-    IsActive:number
-    min_price: number;
-    total_reviews: number;
-    average_rating?: number | undefined;
+  id: string;
+  Name: string;
+  Address: string;
+  FileName: string;
+  IsActive: number
+  min_price: number;
+  total_reviews: number;
+  average_rating?: number | undefined;
 }
 
 
@@ -84,24 +84,7 @@ interface Rate {
   // Define your rate properties here
 }
 
-interface Room {
-  id: string;
-  HotelId: string;
-  Name: string;
-  ConvenientRoom: string;
-  ConvenientBathRoom: string;
-  FloorArea: number;
-  MaxQuantityMember: number;
-  Price: number;
-  Voi_Tam_Dung: number;
-  Ban_Cong_San_Hien: number;
-  Khu_Vuc_Cho: number;
-  May_Lanh: number;
-  Nuoc_Nong: number;
-  Bon_Tam: number;
-  created_at: string;
-  updated_at: string;
-}
+
 
 interface IHotelImage {
   id: string;
@@ -143,49 +126,7 @@ interface IRate {
   created_at: Date;
   updated_at: Date;
 }
-interface ITypeRoom {
-  id: string;
-  HotelId: string;
-  Ban_Cong_San_Hien: boolean;
-  Bon_Tam: boolean;
-  ConvenientBathRoom: string;
-  ConvenientRoom: string;
-  FloorArea: number;
-  Khu_Vuc_Cho: boolean;
-  MaxQuantityMember: number;
-  May_Lanh: boolean;
-  Name: string;
-  Nuoc_Nong: boolean;
-  Price: number;
-  Voi_Tam_Dung: boolean;
-  TenLoaiGiuong: string;
-  SoLuongGiuong: number;
-  Lo_Vi_Song: boolean;
-  Tu_Lanh: boolean;
-  May_Giat: boolean;
-  No_Moking: boolean;
-  created_at: string | null;
-  updated_at: string | null;
-}
-interface IRoom {
-  id: string;
-  TypeRoomId: string;
-  State: boolean;
-  TimeRecive: Date;
-  TimeLeave: Date;
-  Gift: string;
-  Discount: number;
-  Breakfast: boolean;
-  Wifi: boolean;
-  NoMoking: boolean;
-  Cancel: boolean;
-  ChangeTimeRecive: boolean;
-  RoomName: string;
-  Hinh_Thuc_Thanh_Toan: string;
-  Bao_Gom_Thue_Va_Phi: string;
-  created_at: string | null;
-  updated_at: string | null;
-}
+
 
 interface IDiaDiemLanCan {
   id: string;
