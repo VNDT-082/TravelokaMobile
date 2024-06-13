@@ -68,9 +68,9 @@ export default function MemberModal(props: IProps) {
     };
     return (
         <View>
-            <TouchableOpacity >
+            {/* <TouchableOpacity >
                 <Text>Chọn địa điểm đặt phòng</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <Modal visible={memberModalState} transparent={true}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>

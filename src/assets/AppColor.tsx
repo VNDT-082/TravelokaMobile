@@ -1,3 +1,5 @@
+import { white } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+
 export const AppColor = {
     bottom: '#CCFFFF',
     Gray31: '#4F4F4F',
@@ -9,5 +11,7 @@ export const AppColor = {
     Orage: 'FF8A65',
     Gray01: '#EEEEEE',
     Cyan: '#06BCEE',
-    Green21: '#66FF99'
+    CyanLight: '#D9F2FF',
+    Green21: '#66FF99',
+    white: '#FFFFFF',
 }

@@ -1,6 +1,5 @@
 import { Modal, StyleSheet, View, TouchableOpacity, Text, Dimensions, ScrollView } from 'react-native';
 import { AppColor } from "../assets/AppColor";
-import { Pointer } from 'iconsax-react-native';
 
 interface IProps {
     searchProvince: IProvince | undefined;
@@ -16,23 +15,41 @@ export default function ListProvinceModal(props: IProps) {
     };
     return (
         <View>
-            <TouchableOpacity >
+            {/* <TouchableOpacity >
                 <Text>Chọn địa điểm đặt phòng</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <Modal visible={listProvinceModalState} transparent={true}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <TouchableOpacity onPress={toggleModal}
-                            style={styles.closeButton}>
+                        <View style={{
+                            flex: 5, flexDirection: 'row', justifyContent: 'space-around',
+                            alignItems: 'flex-start', height: 50, maxHeight: 50
+                        }}>
                             <Text style={{
-                                fontWeight: 'semibold',
-                                color: AppColor.Cyan
-                            }}>Đóng</Text>
-                        </TouchableOpacity>
-                        <ScrollView>
+                                flex: 4,
+                                justifyContent: 'flex-start',
+                                alignItems: 'flex-end',
+                                fontSize: 18,
+                            }}>Chọn địa điểm</Text>
+                            <TouchableOpacity onPress={toggleModal}
+                                style={{
+                                    flex: 1,
+                                    justifyContent: 'flex-start',
+                                    alignItems: 'flex-end',
+                                    backgroundColor: AppColor.white
+                                }}>
+                                <Text style={{
+                                    fontWeight: 'semibold',
+                                    color: AppColor.Cyan,
+                                    textAlign: 'right',
+                                    backgroundColor: AppColor.white
+                                }}>Đóng</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={{ maxHeight: Dimensions.get('window').height - 350 }}>
                             {listProvince.map((item, index) => (
                                 <TouchableOpacity
-                                    style={styles.container}
+                                    style={[styles.container, { backgroundColor: index % 2 != 0 ? AppColor.white : AppColor.Gray01 }]}
                                     onPress={() => {
                                         setSearchProvince(item)
                                         setListProvinceModalState(false)
@@ -65,37 +82,46 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        width: Dimensions.get('window').width,
     },
     modalContent: {
-        height: Dimensions.get('window').height - 100,
+        height: Dimensions.get('window').height - 250,
+        width: Dimensions.get('window').width - 30,
         backgroundColor: 'white',
         padding: 20,
         borderRadius: 10,
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
     },
     closeButton: {
         justifyContent: 'flex-start',
         alignItems: 'flex-end',
         height: 50,
+        backgroundColor: 'white'
     },
     container: {
-        width: Dimensions.get('window').width - 60,
+        flex: 5,
+        width: Dimensions.get('window').width,
         borderBottomWidth: 1,
         borderBottomColor: AppColor.Gray01,
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         paddingVertical: 12,
         paddingHorizontal: 16,
+        backgroundColor: AppColor.Gray01,
     },
     leftColumn: {
         flex: 3,
+        width: '60%',
         justifyContent: 'center',
         alignItems: 'flex-start',
     },
     rightColumn: {
         flex: 2,
+        width: '40%',
         justifyContent: 'center',
-        alignItems: 'flex-end',
+        alignItems: 'flex-start',
     },
     displayName: {
         fontSize: 16,
@@ -108,7 +134,7 @@ const styles = StyleSheet.create({
         color: '#999',
     },
     regionButton: {
-        paddingHorizontal: 16,
+        paddingHorizontal: 24,
         paddingVertical: 8,
         borderRadius: 20,
         borderWidth: 1,

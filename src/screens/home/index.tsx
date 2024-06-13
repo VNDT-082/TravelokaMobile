@@ -17,31 +17,26 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import NotifyModal from '../../components/NotifyModal';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import OverView from '../../components/OverView';
+import SearchComponent from '../../components/SearchComponent';
+import LocalStoreEnum from '../../axios/LocalStoreEnum';
+import getLocalStorageItem from '../../service/getLocalStorageItem';
+import setLocalStorageItem from '../../service/setLocalStorageItem';
 
 
 const HomeScreen = () => {
     const [notifyValue, setNotifyValue] = useState<string>('');
-
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [celandarModalState, setCelandarModalState] = useState<boolean>(false);
-    const [listProvinceModalState, setListProvinceModalState] = useState<boolean>(false);
-    const [memberModalState, setMemberModalState] = useState<boolean>(false);
-    const [valueSoNguoiLon, setValueSoNguoiLon] = useState<number>(2);
-    const [valueSoTreEm, setValueSoTreEm] = useState<number>(0);
-    const [valueSoPhong, setValueSoPhong] = useState<number>(1);
-    const [valueNguoiLonTreEmPhong, setValueNguoiLonTreEmPhong] = useState<string>(
-        valueSoNguoiLon + ' Người lớn' + valueSoTreEm + ' Trẻ em' + valueSoPhong + ' Phòng');
-
     const [listProvince, setListProvince] = useState<IProvince[]>([]);
     const [onImageErr, setOnImageErr] = useState<boolean>(false);
-    const currentDate = new Date();
-    const [searchDate, setSearchDate] = useState<Date>(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()));
-    const [searchProvince, setSearchProvince] = useState<IProvince>();
     const [provinceCurrentSelected, setProvinceCurrentSelected] = useState<string | undefined>();
 
     const [selectedProvinceOption, setSelectedProvinceOption] = useState<string>('');
     const [listPoster, setListPoster] = useState<IPoster[]>([]);
     const [notifyModalState, setNotifyModalState] = useState<boolean>(false);
+    let provinceSearch = getLocalStorageItem(LocalStoreEnum.CURRENT_PROVINCE_SEARCH);
+    if (provinceSearch != null) {
+        console.log('provinceSearch', provinceSearch)
+    }
     useEffect(() => {
         setIsLoading(true);
         getAllHaveGitCode().then((response) => {
@@ -59,9 +54,15 @@ const HomeScreen = () => {
         setIsLoading(true);
         GetListProvinceDefault().then((response) => {
             if (response != false && response != undefined) {
+                console.log('response_s0', response)
                 setListProvince(response);
                 setSelectedProvinceOption(response[0].id);
                 setProvinceCurrentSelected(response[0].id);
+
+                if (provinceSearch == null) {
+                    let value = JSON.stringify(listProvince[0])
+                    setLocalStorageItem(LocalStoreEnum.CURRENT_PROVINCE_SEARCH, value);
+                }
             }
         }).catch((error) => { console.log(error) })
             .finally(() => { setIsLoading(false) });
@@ -79,68 +80,7 @@ const HomeScreen = () => {
                 <View style={{ backgroundColor: AppColor.Snow1, height: '100%' }}>
                     <HeaderMenu />
                     <ScrollView style={{ marginTop: 50 }}>
-                        <View style={{
-                            marginTop: 5,
-                            width: '95%', margin: 'auto', padding: 5,
-                            borderStyle: 'solid', borderRadius: 10,
-                            backgroundColor: AppColor.Snow1,
-                            shadowColor: '#000',
-                            shadowOffset: {
-                                width: 1,
-                                height: 2,
-                            },
-                            shadowOpacity: 0.23,
-                            shadowRadius: 2.62,
-                            elevation: 4,
-                        }}>
-                            <View style={{
-                                flex: 1, flexDirection: 'row', justifyContent: 'flex-start',
-                                alignItems: 'center', marginTop: 2, marginBottom: 2
-                            }}>
-                                <Location size="32" color="#FF8A65" />
-                                <TextInput placeholder='Khách sạn gần tôi' style={{
-                                    borderRadius: 5,
-                                    backgroundColor: AppColor.Snow1, width: '90%', height: 45
-                                }}
-                                    value={searchProvince != undefined ? searchProvince.DisplayName : ''}
-                                    onPress={() => { setListProvinceModalState(true) }} /></View>
-
-                            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center' }}>
-                                <CalendarSearch size="32" color="#FF8A65" />
-                                <TextInput placeholder='Khách sạn gần tôi' style={{
-                                    borderRadius: 5,
-                                    backgroundColor: AppColor.Snow1, width: '90%', height: 45
-                                }}
-                                    value={searchDate.toLocaleDateString()}
-                                    onPress={() => { setCelandarModalState(true) }} /></View>
-
-                            <View style={{
-                                flex: 1, flexDirection: 'row', justifyContent: 'flex-start',
-                                alignItems: 'center', marginBottom: 2, marginTop: 2
-                            }}>
-                                <UserTag size="32" color="#FF8A65" />
-                                <TextInput placeholder='Khách sạn gần tôi' style={{
-                                    borderRadius: 5,
-                                    backgroundColor: AppColor.Snow1, width: '90%', height: 45
-                                }}
-                                    onPress={() => setMemberModalState(true)}
-                                    value={valueNguoiLonTreEmPhong} /></View>
-
-                            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
-                                <TouchableOpacity style={{
-                                    backgroundColor: 'orange',
-                                    padding: 10,
-                                    borderRadius: 5,
-                                    width: '100%',
-                                    marginTop: 5
-                                }}>
-                                    <Text style={{
-                                        color: 'white',
-                                        textAlign: 'center',
-                                        fontWeight: 'bold',
-                                    }}>Tìm kiếm</Text>
-                                </TouchableOpacity>
-                            </View></View>
+                        <SearchComponent />
 
                         {/* Khu vuc pho bien */}
                         <View style={{ marginBottom: 5, marginTop: 15 }}>
@@ -419,17 +359,6 @@ const HomeScreen = () => {
 
                 </View>
                 <View>
-                    <CelandarModal searchDate={searchDate} setCelandarModalState={setCelandarModalState}
-                        celandarModalState={celandarModalState} setSearchDate={setSearchDate} />
-                    <ListProvinceModal listProvince={listProvince} listProvinceModalState={listProvinceModalState}
-                        setListProvinceModalState={setListProvinceModalState} searchProvince={searchProvince}
-                        setSearchProvince={setSearchProvince} />
-                    <MemberModal valueSoNguoiLon={valueSoNguoiLon} setValueSoNguoiLon={setValueSoNguoiLon}
-                        valueSoTreEm={valueSoTreEm}
-                        setValueSoTreEm={setValueSoTreEm} valueSoPhong={valueSoPhong}
-                        setValueSoPhong={setValueSoPhong} valueNguoiLonTreEmPhong={valueNguoiLonTreEmPhong}
-                        setValueNguoiLonTreEmPhong={setValueNguoiLonTreEmPhong}
-                        setMemberModalState={setMemberModalState} memberModalState={memberModalState} />
                     <NotifyModal notifyModalState={notifyModalState} setNotifyModalState={setNotifyModalState} notifyValue={notifyValue} />
                 </View>
 

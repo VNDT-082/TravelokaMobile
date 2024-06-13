@@ -18,9 +18,9 @@ export default function CelandarModal(props: IProps) {
     };
     return (
         <View>
-            <TouchableOpacity onPress={toggleModal}>
+            {/* <TouchableOpacity onPress={toggleModal}>
                 <Text>Chọn lịch đặt</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <Modal visible={celandarModalState} transparent={true}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
