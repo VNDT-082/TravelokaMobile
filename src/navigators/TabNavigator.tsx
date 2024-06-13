@@ -57,7 +57,15 @@ const TabNavigator = () => {
 
             })}>
                 <Tab.Screen name='Trang chủ' component={HomeScreen} />
-                <Tab.Screen name='Khách sạn' component={TravelScreen} />
+                <Tab.Screen name='Khách sạn' component={TravelScreen} initialParams={{
+                    valueTinh: null,
+                    valueSoDem: null,
+                    valueSoNguoiLon: null,
+                    valueSoTreEm: null,
+                    startDate: null,
+                    valueSoPhong: null,
+                    valueProvinceid: null,
+                }} />
                 <Tab.Screen name='Giỏ hàng' component={CartScreen} />
                 <Tab.Screen name='Cá nhân' component={Profile} />
                 {/* <Tab.Screen name='Login' component={Login} /> */}

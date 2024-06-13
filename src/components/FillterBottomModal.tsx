@@ -4,6 +4,7 @@ import { AppColor } from "../assets/AppColor";
 import { useEffect, useState } from "react";
 import Slider from "@react-native-community/slider";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { CloseSquare } from "iconsax-react-native";
 interface ConvenienceIcon {
     name: string;
     iconName: string;
@@ -12,6 +13,15 @@ interface ConvenienceIcon {
 interface IPops {
     fillterBottomModalState: boolean;
     setFillterBottomModalState: (fillterBottomModalState: boolean) => void;
+}
+const findMax = (arr: number[]) => {
+    let max = 1;
+    arr.forEach(item => {
+        if (max < item) {
+            max = item;
+        }
+    });
+    return max;
 }
 export default function FillterBottomModal(props: IPops) {
     const { fillterBottomModalState, setFillterBottomModalState } = props;
@@ -41,6 +51,7 @@ export default function FillterBottomModal(props: IPops) {
     };
     const [arrConvenientMater, setArrConvenientMater] = useState<ConvenienceIcon[]>(arrConvenient);
     const [arrConvenientSelected, setArrConvenientSelected] = useState<ConvenienceIcon[]>([]);
+    const [arrStarSelected, setArrStarSelected] = useState<number[]>([1]);
     const [star1Checked, setStar1Checked] = useState<boolean>(false);
     const [star2Checked, setStar2Checked] = useState<boolean>(false);
     const [star3Checked, setStar3Checked] = useState<boolean>(false);
@@ -51,6 +62,7 @@ export default function FillterBottomModal(props: IPops) {
     const [typeHotel, setTypeHotel] = useState<boolean>(false);
     const [typeOrder, setTypeOrder] = useState<boolean>(false);
     const [typeAll, setTypeAll] = useState<boolean>(true);
+
     const [arrRateStarHotelSelected, setArrRateStarHotelSelected] = useState<number[]>([]);
     const [priceDistance, setpriceDistance] = useState<number>(50000000);
     const [maxPriceSearch, setMaxPriceSearch] = useState<number>(0);
@@ -69,13 +81,14 @@ export default function FillterBottomModal(props: IPops) {
             }));
         }
     };
-    const setType = (type: 'Hotel' | 'All' | 'Oder') => {
-        if (type == 'All') {
+    const handleSetType = (type: 'Khách sạn' | 'Tất cả' | 'Khác') => {
+        console.log('type', type);
+        if (type == 'Tất cả') {
             setTypeAll(true);
             setTypeHotel(false);
             setTypeOrder(false);
         }
-        else if (type == 'Hotel') {
+        else if (type == 'Khách sạn') {
             setTypeAll(false);
             setTypeHotel(true);
             setTypeOrder(false);
@@ -85,6 +98,25 @@ export default function FillterBottomModal(props: IPops) {
             setTypeHotel(false);
             setTypeOrder(true);
         }
+        setTypeHotelSelected(type);
+        console.log(type);
+    }
+    const handleReset = () => {
+        arrConvenientMater.map(item => {
+            item.isCheck = false;
+        })
+        setArrConvenientSelected([]);
+        setArrRateStarHotelSelected([]);
+        setpriceDistance(0);
+        setTypeAll(true);
+        setTypeHotel(false);
+        setTypeOrder(false);
+        setStar1Checked(false);
+        setStar2Checked(false);
+        setStar3Checked(false);
+        setStar4Checked(false);
+        setStar5Checked(false);
+        setArrStarSelected([1]);
     }
 
     useEffect(() => {
@@ -95,21 +127,28 @@ export default function FillterBottomModal(props: IPops) {
             <Modal visible={fillterBottomModalState} transparent={true}>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
+                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{
+                                flex: 4,
+                                fontWeight: 'bold', color: AppColor.Cyan, marginTop: 10,
+                                fontSize: 18
+                            }}>Bộ lọc</Text>
+                            <CloseSquare size="24" color={AppColor.Cyan} onPress={() => { setFillterBottomModalState(false) }} />
+                        </View>
+
                         <ScrollView style={{ height: 500 }}>
                             <View>
-                                <Text style={{
-                                    fontWeight: 'bold', color: AppColor.Cyan, marginTop: 10,
-                                    fontSize: 18
-                                }}>Bộ lọc</Text>
                                 <View style={{ flexDirection: 'row' }}>
                                     <TouchableOpacity style={styles.button1}>
-                                        <Text style={{ color: AppColor.white }}>Khách sạn</Text>
+                                        <Text style={{ color: AppColor.white }}>{typeHotelSelected}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity style={[styles.button1, { flexDirection: 'row', gap: 5 }]}>
+                                        <Text style={{ color: AppColor.white }}>
+                                            {star5Checked ? 5 : star4Checked ? 4 : star3Checked ? 3 : star2Checked ? 2 : star1Checked ? 1 : 1}</Text>
+                                        <Icon name='star' size={24} color="#FFCC00" />
                                     </TouchableOpacity>
                                     <TouchableOpacity style={styles.button1}>
-                                        <Text style={{ color: AppColor.white }}>Khách sạn</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.button1}>
-                                        <Text style={{ color: AppColor.white }}>Khách sạn</Text>
+                                        <Text style={{ color: AppColor.white }}>+{arrConvenientSelected.length} tiện nghi</Text>
                                     </TouchableOpacity>
                                 </View>
 
@@ -183,50 +222,100 @@ export default function FillterBottomModal(props: IPops) {
                                         {/* 1sao */}
                                         <TouchableOpacity style={{
                                             flex: 1,
-                                            flexDirection: 'row', borderWidth: 1, borderColor: AppColor.Gray31,
+                                            flexDirection: 'row', borderWidth: 0.5, borderColor: AppColor.Gray31,
                                             justifyContent: 'center', alignItems: 'center'
                                         }}
-                                            onPress={() => { setStar1Checked(!star1Checked) }}>
+                                            onPress={() => {
+                                                setStar1Checked(!star1Checked);
+                                                if (star1Checked && arrStarSelected.find(fitem => { return fitem == 1 }) != undefined) {
+                                                    setArrStarSelected([...arrStarSelected, 1]);
+                                                }
+                                                else {
+                                                    setArrStarSelected(arrStarSelected.filter(fitem => {
+                                                        return fitem != 1
+                                                    }))
+                                                }
+                                            }}>
                                             <Text style={{ fontSize: 24, color: star1Checked ? "#FFCC00" : AppColor.Gray31 }}>1</Text>
                                             <Icon name='star' size={24} color={star1Checked ? "#FFCC00" : AppColor.Gray31} />
                                         </TouchableOpacity>
                                         {/* 2sao */}
                                         <TouchableOpacity style={{
                                             flex: 1,
-                                            flexDirection: 'row', borderWidth: 1, borderColor: AppColor.Gray31,
+                                            flexDirection: 'row', borderWidth: 0.5, borderColor: AppColor.Gray31,
                                             justifyContent: 'center', alignItems: 'center'
                                         }}
-                                            onPress={() => { setStar2Checked(!star2Checked) }}>
+                                            onPress={() => {
+                                                setStar2Checked(!star2Checked);
+                                                if (star2Checked && arrStarSelected.find(fitem => { return fitem == 2 }) != undefined) {
+                                                    setArrStarSelected([...arrStarSelected, 2]);
+                                                }
+                                                else {
+                                                    setArrStarSelected(arrStarSelected.filter(fitem => {
+                                                        return fitem != 2
+                                                    }))
+                                                }
+                                            }}>
                                             <Text style={{ fontSize: 24, color: star2Checked ? "#FFCC00" : AppColor.Gray31 }}>2</Text>
                                             <Icon name='star' size={24} color={star2Checked ? "#FFCC00" : AppColor.Gray31} />
                                         </TouchableOpacity>
                                         {/* 3sao */}
                                         <TouchableOpacity style={{
                                             flex: 1,
-                                            flexDirection: 'row', borderWidth: 1, borderColor: AppColor.Gray31,
+                                            flexDirection: 'row', borderWidth: 0.5, borderColor: AppColor.Gray31,
                                             justifyContent: 'center', alignItems: 'center'
                                         }}
-                                            onPress={() => { setStar3Checked(!star3Checked) }}>
+                                            onPress={() => {
+                                                setStar3Checked(!star3Checked);
+                                                if (star3Checked && arrStarSelected.find(fitem => { return fitem == 3 }) != undefined) {
+                                                    setArrStarSelected([...arrStarSelected, 3]);
+                                                }
+                                                else {
+                                                    setArrStarSelected(arrStarSelected.filter(fitem => {
+                                                        return fitem != 3
+                                                    }))
+                                                }
+                                            }}>
                                             <Text style={{ fontSize: 24, color: star3Checked ? "#FFCC00" : AppColor.Gray31 }}>3</Text>
                                             <Icon name='star' size={24} color={star3Checked ? "#FFCC00" : AppColor.Gray31} />
                                         </TouchableOpacity>
                                         {/* 4sao */}
                                         <TouchableOpacity style={{
                                             flex: 1,
-                                            flexDirection: 'row', borderWidth: 1, borderColor: AppColor.Gray31,
+                                            flexDirection: 'row', borderWidth: 0.5, borderColor: AppColor.Gray31,
                                             justifyContent: 'center', alignItems: 'center'
                                         }}
-                                            onPress={() => { setStar4Checked(!star4Checked) }}>
+                                            onPress={() => {
+                                                setStar4Checked(!star4Checked);
+                                                if (star4Checked && arrStarSelected.find(fitem => { return fitem == 4 }) != undefined) {
+                                                    setArrStarSelected([...arrStarSelected, 4]);
+                                                }
+                                                else {
+                                                    setArrStarSelected(arrStarSelected.filter(fitem => {
+                                                        return fitem != 4
+                                                    }))
+                                                }
+                                            }}>
                                             <Text style={{ fontSize: 24, color: star4Checked ? "#FFCC00" : AppColor.Gray31 }}>4</Text>
                                             <Icon name='star' size={24} color={star4Checked ? "#FFCC00" : AppColor.Gray31} />
                                         </TouchableOpacity>
                                         {/* 5sao */}
                                         <TouchableOpacity style={{
                                             flex: 1, height: 50,
-                                            flexDirection: 'row', borderWidth: 1, borderColor: AppColor.Gray31,
+                                            flexDirection: 'row', borderWidth: 0.5, borderColor: AppColor.Gray31,
                                             justifyContent: 'center', alignItems: 'center'
                                         }}
-                                            onPress={() => { setStar5Checked(!star5Checked) }}>
+                                            onPress={() => {
+                                                setStar5Checked(!star5Checked);
+                                                if (star5Checked && arrStarSelected.find(fitem => { return fitem == 5 }) != undefined) {
+                                                    setArrStarSelected([...arrStarSelected, 5]);
+                                                }
+                                                else {
+                                                    setArrStarSelected(arrStarSelected.filter(fitem => {
+                                                        return fitem != 5
+                                                    }))
+                                                }
+                                            }}>
                                             <Text style={{ fontSize: 24, color: star5Checked ? "#FFCC00" : AppColor.Gray31 }}>5</Text>
                                             <Icon name='star' size={24} color={star5Checked ? "#FFCC00" : AppColor.Gray31} />
                                         </TouchableOpacity>
@@ -334,27 +423,51 @@ export default function FillterBottomModal(props: IPops) {
                                     ))}
                                 </View>
 
-                                <View>
+                                <View style={{ marginBottom: 10 }}>
                                     <Text style={{
                                         fontWeight: 'bold', color: AppColor.Cyan, marginTop: 10,
                                         fontSize: 18
                                     }}>Loại hình kinh doanh</Text>
-                                    <Text style={{
-                                        width: '100%', fontSize: 18,
-                                        backgroundColor: typeAll ? AppColor.CyanLight : AppColor.white
-                                    }}
-                                        onPress={() => { () => setType('All') }}>Tất cả</Text>
-                                    <Text style={{
-                                        width: '100%', fontSize: 18, paddingVertical: 10,
-                                        backgroundColor: typeHotel ? AppColor.CyanLight : AppColor.white
-                                    }}
-                                        onPress={() => { () => setType('Hotel') }}>Khách sạn</Text>
-                                    <Text
+                                    <TouchableOpacity onPress={() => { handleSetType('Tất cả') }}
                                         style={{
-                                            width: '100%', fontSize: 18,
-                                            backgroundColor: typeOrder ? AppColor.CyanLight : AppColor.white
+                                            flexDirection: 'row', flex: 5, justifyContent: 'center', alignItems: 'center',
+                                            backgroundColor: typeAll ? AppColor.CyanLight : AppColor.white
+                                        }}>
+                                        <Text style={{
+                                            flex: 4,
+                                            width: '100%', fontSize: 18, paddingVertical: 10, paddingLeft: 10,
+
                                         }}
-                                        onPress={() => { () => setType('Oder') }}>Khác</Text>
+                                        >Tất cả</Text>
+                                        {typeAll ? <Icon name="check" size={18} color={AppColor.Blue1} style={{ flex: 1 }} /> : null}
+                                    </TouchableOpacity>
+                                    <TouchableOpacity onPress={() => { handleSetType('Khách sạn') }}
+                                        style={{
+                                            flexDirection: 'row', flex: 5, justifyContent: 'center', alignItems: 'center',
+                                            backgroundColor: typeHotel ? AppColor.CyanLight : AppColor.white
+                                        }}>
+                                        <Text style={{
+                                            flex: 4,
+                                            width: '100%', fontSize: 18, paddingVertical: 10, paddingLeft: 10,
+                                            backgroundColor: typeHotel ? AppColor.CyanLight : AppColor.white
+                                        }} >Khách sạn</Text>
+                                        {typeHotel ? <Icon name="check" size={18} color={AppColor.Blue1} style={{ flex: 1 }} /> : null}
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity onPress={() => { handleSetType('Khác') }}
+                                        style={{
+                                            flexDirection: 'row', flex: 5, justifyContent: 'center', alignItems: 'center',
+                                            backgroundColor: typeOrder ? AppColor.CyanLight : AppColor.white
+                                        }}>
+                                        <Text
+                                            style={{
+                                                flex: 4,
+                                                width: '100%', fontSize: 18, paddingVertical: 10, paddingLeft: 10,
+                                            }}
+                                        >khác</Text>
+                                        {typeOrder ? <Icon name="check" size={18} color={AppColor.Blue1} style={{ flex: 1 }} /> : null}
+                                    </TouchableOpacity>
+
                                 </View>
 
                             </View>
@@ -369,7 +482,8 @@ export default function FillterBottomModal(props: IPops) {
                                 justifyContent: 'center', alignItems: 'center',
                                 borderBlockColor: AppColor.Blue1, borderWidth: 1,
                                 borderRadius: 10
-                            }}>
+                            }}
+                                onPress={() => { handleReset() }}>
                                 <Text style={{ fontSize: 18, fontWeight: 'semibold', color: AppColor.Blue1 }}>Đặt lại</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={{
