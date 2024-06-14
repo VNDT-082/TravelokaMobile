@@ -5,14 +5,24 @@ import { useEffect, useState } from "react";
 import Slider from "@react-native-community/slider";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { CloseSquare } from "iconsax-react-native";
-interface ConvenienceIcon {
-    name: string;
-    iconName: string;
-    isCheck: boolean;
-}
+import GetMinDiscountByListTyperoom from "../service/GetMinDiscountByListTyperoom";
+import NotifyModal from "./NotifyModal";
+
 interface IPops {
     fillterBottomModalState: boolean;
     setFillterBottomModalState: (fillterBottomModalState: boolean) => void;
+    arrConvenientSelected: ConvenienceIcon[];
+    setArrConvenientSelected: (arrConvenientSelected: ConvenienceIcon[]) => void;
+    arrStarSelected: number[];
+    setArrStarSelected: (arrStarSelected: number[]) => void;
+    priceDistance: number;
+    setpriceDistance: (priceDistance: number) => void;
+    listHotel: IHotel[];
+    setListHotel: (listHotel: IHotel[]) => void;
+    listHotelShort: IHotel[];
+    setListHotelShort: (listHotelShort: IHotel[]) => void;
+    typeHotelSelected: string;
+    setTypeHotelSelected: (typeHotelSelected: string) => void;
 }
 const findMax = (arr: number[]) => {
     let max = 1;
@@ -24,7 +34,15 @@ const findMax = (arr: number[]) => {
     return max;
 }
 export default function FillterBottomModal(props: IPops) {
-    const { fillterBottomModalState, setFillterBottomModalState } = props;
+    const {
+        fillterBottomModalState, setFillterBottomModalState,
+        arrConvenientSelected, setArrConvenientSelected,
+        arrStarSelected, setArrStarSelected,
+        priceDistance, setpriceDistance,
+        listHotel, setListHotel,
+        listHotelShort, setListHotelShort,
+        typeHotelSelected, setTypeHotelSelected
+    } = props;
     const arrConvenient: ConvenienceIcon[] = [
         { isCheck: false, name: 'WiFi', iconName: 'WiFi' },
         { isCheck: false, name: 'Hồ bơi', iconName: 'Hồ bơi' },
@@ -50,26 +68,25 @@ export default function FillterBottomModal(props: IPops) {
         'Đưa đón sân bay': require('../assets/icon/DuaDon.webp'),
     };
     const [arrConvenientMater, setArrConvenientMater] = useState<ConvenienceIcon[]>(arrConvenient);
-    const [arrConvenientSelected, setArrConvenientSelected] = useState<ConvenienceIcon[]>([]);
-    const [arrStarSelected, setArrStarSelected] = useState<number[]>([1]);
+
     const [star1Checked, setStar1Checked] = useState<boolean>(false);
     const [star2Checked, setStar2Checked] = useState<boolean>(false);
     const [star3Checked, setStar3Checked] = useState<boolean>(false);
     const [star4Checked, setStar4Checked] = useState<boolean>(false);
     const [star5Checked, setStar5Checked] = useState<boolean>(false);
 
-    const [typeHotelSelected, setTypeHotelSelected] = useState<string>('Tất cả');
+
     const [typeHotel, setTypeHotel] = useState<boolean>(false);
     const [typeOrder, setTypeOrder] = useState<boolean>(false);
     const [typeAll, setTypeAll] = useState<boolean>(true);
 
     const [arrRateStarHotelSelected, setArrRateStarHotelSelected] = useState<number[]>([]);
-    const [priceDistance, setpriceDistance] = useState<number>(50000000);
-    const [maxPriceSearch, setMaxPriceSearch] = useState<number>(0);
+
+    const [maxPriceSearch, setMaxPriceSearch] = useState<number>(10000000);
     const [showFillterStar, setShowFillterStar] = useState<boolean>(true);
     const [showFillterConvenient, setShowFillterConvenient] = useState<boolean>(true);
     const [showFillterHotelCate, setShowFillterHotelCate] = useState<boolean>(true);
-    const [listHotelSearch, setListHotelSearch] = useState<IHotel[]>([]);
+
     const handleClickConvenient = (item: ConvenienceIcon, index: number) => {
         arrConvenientMater[index].isCheck = !arrConvenientMater[index].isCheck;
         if (arrConvenientMater[index].isCheck == true) {
@@ -107,7 +124,8 @@ export default function FillterBottomModal(props: IPops) {
         })
         setArrConvenientSelected([]);
         setArrRateStarHotelSelected([]);
-        setpriceDistance(0);
+        setpriceDistance(10000000);
+        setMaxPriceSearch(10000000)
         setTypeAll(true);
         setTypeHotel(false);
         setTypeOrder(false);
@@ -117,11 +135,68 @@ export default function FillterBottomModal(props: IPops) {
         setStar4Checked(false);
         setStar5Checked(false);
         setArrStarSelected([1]);
+        setListHotelShort(listHotel);
     }
 
     useEffect(() => {
         setArrConvenientMater(arrConvenientMater);
     }, [arrConvenientMater])
+
+    const checkConvenientHaveExist = (hotel: IHotel): boolean => {
+        let flag = false;
+        if (arrConvenientSelected.length == 0 || arrConvenientSelected == undefined) {
+            return true;
+        }
+        arrConvenientSelected.map(item => {
+            hotel.convenients?.map(citem => {
+                citem.Description.map(sitem => {
+                    if (sitem == item.name) {
+                        flag = true;
+                    }
+                })
+            })
+        })
+        return flag;
+    }
+    const checkStarHaveExist = (star: number): boolean => {
+        if (!star1Checked && !star2Checked && !star3Checked && !star3Checked && !star4Checked && !star5Checked) {
+            return true;
+        }
+        else if (star1Checked && star == 1) {
+            return true;
+        }
+        else if (star2Checked && star == 2) {
+            return true;
+        }
+        else if (star3Checked && star == 3) {
+            return true;
+        }
+        else if (star4Checked && star == 4) {
+            return true;
+        }
+        else if (star5Checked && star == 5) {
+            return true;
+        }
+        return false;
+    }
+    const [notifyModalState, setNotifyModalState] = useState<boolean>(false);
+    const handleSussesSearch = () => {
+        console.log('arrConvenientSelected', arrConvenientSelected)
+        if (listHotelShort == undefined || listHotelShort == null || listHotel == undefined || listHotel == null) {
+            setNotifyModalState(true);
+            return;
+        }
+        setListHotelShort(
+            listHotel.filter(item => {
+                return (item.Type == typeHotelSelected || typeHotelSelected == 'Tất cả')
+                    && (checkConvenientHaveExist(item))
+                    && (checkStarHaveExist(item.StarRate))
+                    && (item.type_rooms != undefined && GetMinDiscountByListTyperoom(item.type_rooms).acturPrice < priceDistance)
+            }));
+        // console.log('listHotelShort', listHotelShort)
+        // console.log('listHotel', listHotel)
+        setFillterBottomModalState(false);
+    }
     return (
         <View>
             <Modal visible={fillterBottomModalState} transparent={true}>
@@ -148,7 +223,7 @@ export default function FillterBottomModal(props: IPops) {
                                         <Icon name='star' size={24} color="#FFCC00" />
                                     </TouchableOpacity>
                                     <TouchableOpacity style={styles.button1}>
-                                        <Text style={{ color: AppColor.white }}>+{arrConvenientSelected.length} tiện nghi</Text>
+                                        <Text style={{ color: AppColor.white }}>+{arrConvenientSelected?.length} tiện nghi</Text>
                                     </TouchableOpacity>
                                 </View>
 
@@ -174,13 +249,45 @@ export default function FillterBottomModal(props: IPops) {
                                             flex: 2, width: '100%', fontSize: 15, fontWeight: 'semibold',
                                             borderWidth: 1, borderColor: AppColor.Gray31, textAlign: 'center'
                                             , borderRadius: 10, paddingHorizontal: 20, paddingVertical: 5
-                                        }}>VNĐ {priceDistance.toLocaleString()}</Text>
+                                        }}>VNĐ {priceDistance?.toLocaleString()}</Text>
+                                    </View>
+                                    <Text style={{
+                                        marginTop: 10, color: AppColor.Cyan, fontWeight: 'semibold', fontSize: 15
+                                    }}>Chọn khoảng giá mong muốn</Text>
+                                    <View style={{
+                                        flex: 6, flexDirection: 'row', justifyContent: 'center',
+                                        alignItems: 'center', marginTop: 5, gap: 5
+                                    }}>
+                                        <Text style={{
+                                            flex: 2, width: '100%', fontSize: 12, fontWeight: 'semibold',
+                                            borderWidth: 1, borderColor: AppColor.Gray31, textAlign: 'center'
+                                            , borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5
+                                            , backgroundColor: maxPriceSearch == 10000000 ? AppColor.CyanLight : AppColor.white
+                                        }}
+                                            onPress={() => { setMaxPriceSearch(10000000); setpriceDistance(10000000) }}>Dưới 10.000.000 VNĐ</Text>
+                                        <Text style={{
+                                            flex: 2, width: '100%', fontSize: 12, fontWeight: 'semibold',
+                                            borderWidth: 1, borderColor: AppColor.Gray31, textAlign: 'center'
+                                            , borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5
+                                            , backgroundColor: maxPriceSearch == 50000000 ? AppColor.CyanLight : AppColor.white
+                                        }}
+                                            onPress={() => {
+                                                setMaxPriceSearch(50000000);
+                                                setpriceDistance(50000000)
+                                            }}>Dưới 50.000.000 VNĐ</Text>
+                                        <Text style={{
+                                            flex: 2, width: '100%', fontSize: 12, fontWeight: 'semibold',
+                                            borderWidth: 1, borderColor: AppColor.Gray31, textAlign: 'center'
+                                            , borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5
+                                            , backgroundColor: maxPriceSearch == 500000000 ? AppColor.CyanLight : AppColor.white
+                                        }}
+                                            onPress={() => { setMaxPriceSearch(500000000); setpriceDistance(500000000) }}>Dưới 500.000.000 VNĐ</Text>
                                     </View>
                                     <View>
                                         <Slider
                                             style={{ width: '100%', height: 40 }}
                                             minimumValue={0}
-                                            maximumValue={100000000}
+                                            maximumValue={maxPriceSearch}
                                             minimumTrackTintColor={AppColor.Cyan}
                                             maximumTrackTintColor="#000000"
                                             thumbImage={require('../assets/icon/birth.png')}
@@ -227,7 +334,7 @@ export default function FillterBottomModal(props: IPops) {
                                         }}
                                             onPress={() => {
                                                 setStar1Checked(!star1Checked);
-                                                if (star1Checked && arrStarSelected.find(fitem => { return fitem == 1 }) != undefined) {
+                                                if (star1Checked && arrStarSelected.find(fitem => { return fitem == 1 }) == undefined) {
                                                     setArrStarSelected([...arrStarSelected, 1]);
                                                 }
                                                 else {
@@ -247,7 +354,7 @@ export default function FillterBottomModal(props: IPops) {
                                         }}
                                             onPress={() => {
                                                 setStar2Checked(!star2Checked);
-                                                if (star2Checked && arrStarSelected.find(fitem => { return fitem == 2 }) != undefined) {
+                                                if (star2Checked && arrStarSelected.find(fitem => { return fitem == 2 }) == undefined) {
                                                     setArrStarSelected([...arrStarSelected, 2]);
                                                 }
                                                 else {
@@ -267,7 +374,7 @@ export default function FillterBottomModal(props: IPops) {
                                         }}
                                             onPress={() => {
                                                 setStar3Checked(!star3Checked);
-                                                if (star3Checked && arrStarSelected.find(fitem => { return fitem == 3 }) != undefined) {
+                                                if (star3Checked && arrStarSelected.find(fitem => { return fitem == 3 }) == undefined) {
                                                     setArrStarSelected([...arrStarSelected, 3]);
                                                 }
                                                 else {
@@ -287,7 +394,7 @@ export default function FillterBottomModal(props: IPops) {
                                         }}
                                             onPress={() => {
                                                 setStar4Checked(!star4Checked);
-                                                if (star4Checked && arrStarSelected.find(fitem => { return fitem == 4 }) != undefined) {
+                                                if (star4Checked && arrStarSelected.find(fitem => { return fitem == 4 }) == undefined) {
                                                     setArrStarSelected([...arrStarSelected, 4]);
                                                 }
                                                 else {
@@ -307,7 +414,7 @@ export default function FillterBottomModal(props: IPops) {
                                         }}
                                             onPress={() => {
                                                 setStar5Checked(!star5Checked);
-                                                if (star5Checked && arrStarSelected.find(fitem => { return fitem == 5 }) != undefined) {
+                                                if (star5Checked && arrStarSelected.find(fitem => { return fitem == 5 }) == undefined) {
                                                     setArrStarSelected([...arrStarSelected, 5]);
                                                 }
                                                 else {
@@ -330,7 +437,7 @@ export default function FillterBottomModal(props: IPops) {
                                     flexDirection: 'row', gap: 10
                                 }}>
                                     <ScrollView horizontal>
-                                        {arrConvenientSelected.map(item => (
+                                        {arrConvenientSelected?.map(item => (
                                             <Text
                                                 style={{
                                                     color: AppColor.Gray31, marginTop: 5,
@@ -491,10 +598,14 @@ export default function FillterBottomModal(props: IPops) {
                                 justifyContent: 'center', alignItems: 'center',
                                 borderBlockColor: AppColor.Blue1, borderWidth: 1,
                                 borderRadius: 10
-                            }}>
+                            }}
+                                onPress={() => { handleSussesSearch() }}>
                                 <Text style={{ fontSize: 18, fontWeight: 'semibold', color: AppColor.white }}>Hoàn tất</Text>
                             </TouchableOpacity>
                         </View>
+
+                        <NotifyModal notifyModalState={notifyModalState} setNotifyModalState={setNotifyModalState} notifyValue="Lỗi kết nối" />
+                        {/* key={'NotifyModalFillterBottomModal'} */}
                     </View>
                 </View>
 

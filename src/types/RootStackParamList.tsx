@@ -8,4 +8,8 @@ type RootStackParamList = {
         valueSoPhong: string | null;
         valueProvinceid: string | null;
     };
+    DetailHotel: {
+        idHotel: string;
+    };
 };
+

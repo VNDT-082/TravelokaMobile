@@ -9,9 +9,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   useColorScheme,
@@ -22,9 +19,9 @@ import {
   Colors,
 } from 'react-native/Libraries/NewAppScreen';
 import TabNavigator from './src/navigators/TabNavigator';
-import { createStackNavigator } from '@react-navigation/stack';
 import Login from './src/screens/login';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import DetailHotel from './src/screens/detail';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -74,6 +71,14 @@ function App(): React.JSX.Element {
         <RootStack.Screen
           name="Login"
           component={Login}
+          options={{ headerShown: false }}
+        />
+        <RootStack.Screen
+          name="DetailHotel"
+          component={DetailHotel}
+          initialParams={{
+            idHotel: null,
+          }}
           options={{ headerShown: false }}
         />
       </RootStack.Navigator>

@@ -1,14 +1,9 @@
-import { View, Text, ScrollView, Image, ActivityIndicator, TouchableOpacity, Alert } from 'react-native'
+import { View, Text, ScrollView, Image, ActivityIndicator, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import HeaderMenu from '../../components/HeaderMenu';
 import { AppColor } from '../../assets/AppColor';
 import URL_Enum from '../../axios/URL_Enum';
-import { TextInput } from 'react-native-paper';
-import { CalendarSearch, Location, UserTag } from 'iconsax-react-native';
-import CelandarModal from '../../components/CelandarModal';
 import { GetListProvinceDefault } from '../../service/province.service';
-import ListProvinceModal from '../../components/ListProvinceModal';
-import MemberModal from '../../components/MemberModal';
 import Star from '../../components/Star';
 import ToDoAVGFromArray from '../../service/ToDoAVGFromArray';
 import GetMinDiscountByListTyperoom from '../../service/GetMinDiscountByListTyperoom';
@@ -21,9 +16,12 @@ import SearchComponent from '../../components/SearchComponent';
 import LocalStoreEnum from '../../axios/LocalStoreEnum';
 import getLocalStorageItem from '../../service/getLocalStorageItem';
 import setLocalStorageItem from '../../service/setLocalStorageItem';
+import { Dimensions } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 
 const HomeScreen = () => {
+    const navigation = useNavigation();
     const [notifyValue, setNotifyValue] = useState<string>('');
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [listProvince, setListProvince] = useState<IProvince[]>([]);
@@ -70,6 +68,9 @@ const HomeScreen = () => {
     const handleProvinceOptionChange = (id_province: string): void => {
         setSelectedProvinceOption(id_province); // Cập nhật giá trị của radio button được chọn
     };
+    const handleClickHotel = (id: string) => {
+        navigation.navigate('DetailHotel', { idHotel: id })
+    }
 
     return (
         isLoading ? <View style={{
@@ -78,9 +79,21 @@ const HomeScreen = () => {
         }}><ActivityIndicator /></View> :
             <>
                 <View style={{ backgroundColor: AppColor.Snow1, height: '100%' }}>
-                    <HeaderMenu />
-                    <ScrollView style={{ marginTop: 50 }}>
-                        <SearchComponent />
+                    <ScrollView style={{ marginTop: 0 }}>
+                        <ScrollView horizontal style={{ width: '100%', backgroundColor: AppColor.Cyan }}>
+                            <Image style={{ width: Dimensions.get('window').width, height: 220, borderRadius: 5 }}
+                                source={require('../../assets/booking/portfolio.jpg')} />
+                            {listPoster != undefined ? listPoster.map((item, index) => (
+                                <Image style={{ width: Dimensions.get('window').width, height: 220, borderRadius: 5 }}
+                                    source={{ uri: URL_Enum.BaseURL_Poster + item.FileName }}
+                                    key={index}
+                                    resizeMode='cover' />
+                            )) : null}
+                        </ScrollView>
+                        <View style={{ marginTop: -40 }}>
+                            <SearchComponent key={'SearchComponentHome'} />
+                        </View>
+
 
                         {/* Khu vuc pho bien */}
                         <View style={{ marginBottom: 5, marginTop: 15 }}>
@@ -141,8 +154,7 @@ const HomeScreen = () => {
                                     }).map((item) => (
                                         item.hotels?.map((hitem) => (
                                             <TouchableOpacity style={{ marginLeft: 10 }}
-                                                onPress={() => {
-                                                }}>
+                                                onPress={() => { handleClickHotel(hitem.id) }}>
                                                 <View style={{
                                                     width: 200, position: 'relative',
                                                     shadowColor: '#000',

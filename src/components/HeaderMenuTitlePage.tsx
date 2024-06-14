@@ -4,7 +4,11 @@ import { Microphone2, Notification, SearchNormal1, SearchStatus } from 'iconsax-
 import { AppColor } from '../assets/AppColor'
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const HeaderMenuTitlePage = () => {
+interface IProps {
+    title: string;
+}
+const HeaderMenuTitlePage = (props: IProps) => {
+    const { title } = props;
     return (
         <View style={{
             height: 50, flex: 1, flexDirection: 'row', backgroundColor: AppColor.Blue1, width: '100%',
@@ -21,7 +25,7 @@ const HeaderMenuTitlePage = () => {
                     justifyContent: 'center', alignItems: 'center'
                 }}>
                     <Text>
-
+                        {title}
                     </Text>
                 </View>
 
