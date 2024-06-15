@@ -18,4 +18,5 @@ export const AppColor = {
     BlueDark: '#235C9F',
     Red: '#FF0000',
     Yellow01: '#FFFF66',
+    SaddleBrown: '#8B4513',
 }

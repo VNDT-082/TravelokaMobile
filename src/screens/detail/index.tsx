@@ -7,17 +7,23 @@ import HeaderMenuTitlePage from "../../components/HeaderMenuTitlePage";
 import { getOneHotelByID } from "../../service/hotel.service";
 import ErrorModal from "../../components/ErrorModal";
 import { AppColor } from "../../assets/AppColor";
-import { ArrowUp2, Clock, Location, Warning2 } from "iconsax-react-native";
+import { ArrowRight2, ArrowUp2, Clock, DiscountShape, Location, MoneySend, Warning2 } from "iconsax-react-native";
 import URL_Enum from "../../axios/URL_Enum";
 import Star from "../../components/Star";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { getListDiaDiemLanCanByHotelID } from "../../service/diadiemlancan.service";
 import DescrionAndPolicyModal from "../../components/DescrionAndPolicyModal";
 import ListImageModal from "../../components/ListImageModal";
-import { Path, Svg } from "react-native-svg";
 import IconFloorArea from "../../components/iconfromsvg/IconFloorArea";
-import IconGiuong from "../../components/iconfromsvg/IconGiuong";
+import GetMinDiscountByListRoom from "../../service/GetMinDiscountByListRoom";
+import RoomModal from "../../components/RoomModal";
+import RateHotelComponent from "../../components/RateHotelComponent";
 
+const getRoomEmpty = (arr: IRoom[]): number => {
+    return arr.filter(item => {
+        return item.State == false;
+    }).length;
+}
 type ScreenDetailHotelProp = RouteProp<RootStackParamList, 'DetailHotel'>;
 const DetailHotel: React.FC<ScreenProps> = () => {
     const route = useRoute<ScreenDetailHotelProp>();
@@ -31,12 +37,24 @@ const DetailHotel: React.FC<ScreenProps> = () => {
     const [listDiaDiemLanCan, setListDiaDiemLanCan] = useState<IDiaDiemLanCan[]>([])
     const [errorModalState, setErrorModalState] = useState<boolean>(false);
     const [listImageModalState, setListImageModalState] = useState<boolean>(false);
+    const [roomModalState, setRoomModalState] = useState<boolean>(false);
     const [descrionAndPolicyModalState, setDescrionAndPolicyModalState] = useState<boolean>(false);
     const [listImage, setListImage] = useState<IHotelImage[]>([]);
+    const [listImageTypeRoomSelected, setListImageTypeRoomSelected] = useState<IHotelImage[]>([]);
+    const [typeRoomSelected, setTypeRoomSelected] = useState<ITypeRoom>();
     const arrTypeOpenState: string[] = ['MoTa', 'ChinhSach'];
     const [typeOpenState, setTypeOpenState] = useState<'MoTa' | 'ChinhSach'>('MoTa');
     const [errorDes, setErrorDes] = useState<string>('')
-    const [typeNotify, setTypeNotify] = useState<'Error' | 'Sucsess' | 'Warning'>('Sucsess')
+    const [typeNotify, setTypeNotify] = useState<'Error' | 'Sucsess' | 'Warning'>('Sucsess');
+
+    const [listRate, setListRate] = useState<IRate[]>([]);
+    const [avgRate, setAvgRate] = useState<number>(0);
+    const [avgRateText, setAvgRateText] = useState<'Chưa có đánh giá' | 'Trung bình' | 'Tốt' | 'Ấn tượng'>('Chưa có đánh giá');
+    const arrHienThiGia = ['Mỗi phòng mỗi đêm (bao gồm thuế và phí)', 'Mỗi phòng mỗi đêm (chưa bao gồm thuế và phí)',
+        'Tổng giá (bao gồm thuế và phí)', 'Tổng giá (chưa bao gồm thuế và phí)']
+    const [hienThiGia, setHienThiGia] = useState<string>('Mỗi phòng mỗi đêm (bao gồm thuế và phí)');
+    const [dsHienThiGiaState, setDsHienThiGiaState] = useState<boolean>(false);//mac dinh an danh sach 
+
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     if (idHotel == undefined && idHotel == null) {
@@ -319,7 +337,7 @@ const DetailHotel: React.FC<ScreenProps> = () => {
                                         }}
                                             source={{ uri: URL_Enum.BaseURL_Image_Icon + item.ImageIcon }}
                                             resizeMode="cover" />
-                                        <Text style={{ fontSize: 18, fontWeight: "semibold", marginLeft: 10 }}>{item.Name}</Text>
+                                        <Text style={{ fontSize: 18, fontWeight: "bold", marginLeft: 10 }}>{item.Name}</Text>
                                     </View>
                                     <Text style={{ paddingLeft: 20, paddingRight: 5 }}>{item.Description}</Text>
                                 </View>
@@ -351,159 +369,13 @@ const DetailHotel: React.FC<ScreenProps> = () => {
                         {hotel?.type_rooms != undefined ?
                             <View style={{ backgroundColor: AppColor.Gray01 }}>
                                 {hotel.type_rooms.map((item, index) => (
-                                    <View key={index} style={{
-                                        backgroundColor: AppColor.white,
-                                        padding: 10, marginVertical: 10,
-                                        shadowColor: '#000',
-                                        shadowOffset: {
-                                            width: 1,
-                                            height: 2,
-                                        },
-                                        shadowOpacity: 0.23,
-                                        shadowRadius: 2.62,
-                                        elevation: 4,
-                                        borderRadius: 10
-                                    }}>
-                                        <ScrollView horizontal>
-                                            {hotel.images.filter(fitem => {
-                                                return fitem.TypeRoom.split(';')[0] == item.id;
-                                            }).map((item, hindex) => (
-                                                <View style={{ width: Dimensions.get('window').width - 100, marginHorizontal: 5, borderRadius: 10 }} key={hindex}>
-                                                    <Image style={{ width: '100%', height: 220, borderRadius: 10 }}
-                                                        source={{ uri: URL_Enum.BaseURL_Image + item.FileName }} />
-                                                </View>
-                                            ))}
-                                        </ScrollView>
-                                        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.Name}</Text>
-                                        <ScrollView horizontal>
-                                            <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <IconFloorArea height="24" width="24" />
-                                                <Text style={{ fontSize: 16, }}>{item.FloorArea} m²</Text>
-                                            </View>
-
-                                            <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/TreEmVaThuCung.webp')} />
-                                                <Text style={{ fontSize: 16, }}>{item.MaxQuantityMember} người</Text>
-                                            </View>
-
-                                            <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/giuong.webp')} />
-                                                <Text style={{ fontSize: 16, }}>{item.SoLuongGiuong + ' ' + item.TenLoaiGiuong}</Text>
-                                            </View>
-                                            {item.Voi_Tam_Dung ? <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/voisen.webp')} />
-                                                <Text style={{ fontSize: 16, }}>Vòi tắm đứng</Text>
-                                            </View> : null}
-
-                                            {item.Ban_Cong_San_Hien ? <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/bancong.webp')} />
-                                                <Text style={{ fontSize: 16, }}>Ban công sân hiên</Text>
-                                            </View> : null}
-
-
-                                            {item.Khu_Vuc_Cho ? <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/khuvucho.webp')} />
-                                                <Text style={{ fontSize: 16, }}>Ban công sân hiên</Text>
-                                            </View> : null}
-
-                                            {item.May_Lanh ? <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/maylanh.webp')} />
-                                                <Text style={{ fontSize: 16, }}>Máy lạnh</Text>
-                                            </View> : null}
-
-                                            {item.Nuoc_Nong ? <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/nuocnong.webp')} />
-                                                <Text style={{ fontSize: 16, }}>Nước nóng</Text>
-                                            </View> : null}
-
-
-                                            {item.Bon_Tam ? <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/bontam.webp')} />
-                                                <Text style={{ fontSize: 16, }}>Bồn tắm</Text>
-                                            </View> : null}
-
-                                            {item.Lo_Vi_Song ? <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/lovisong.webp')} />
-                                                <Text style={{ fontSize: 16, }}>Lò vi sóng</Text>
-                                            </View> : null}
-
-
-                                            {item.Tu_Lanh ? <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/TienNghiPhong.webp')} />
-                                                <Text style={{ fontSize: 16, }}>Tủ lạnh</Text>
-                                            </View> : null}
-
-
-                                            {item.May_Giat ? <View style={{
-                                                flexDirection: 'row', borderColor: AppColor.Blue1,
-                                                borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
-                                                marginHorizontal: 5
-                                            }}>
-                                                <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                    source={require('../../assets/icon/maygiat.webp')} />
-                                                <Text style={{ fontSize: 16, }}>Máy giặt</Text>
-                                            </View> : null}
-
-                                        </ScrollView>
-                                        <View style={{
-                                            borderStyle: 'solid', borderRadius: 10,
-                                            backgroundColor: AppColor.Snow1,
-                                            width: '100%',
-                                            shadowColor: AppColor.Gray31,
+                                    item.room?.find((roomFilter) => {
+                                        return roomFilter.State == false;
+                                    }) != undefined ?
+                                        <View key={index} style={{
+                                            backgroundColor: AppColor.white,
+                                            padding: 10, marginVertical: 10,
+                                            shadowColor: '#000',
                                             shadowOffset: {
                                                 width: 1,
                                                 height: 2,
@@ -511,40 +383,264 @@ const DetailHotel: React.FC<ScreenProps> = () => {
                                             shadowOpacity: 0.23,
                                             shadowRadius: 2.62,
                                             elevation: 4,
+                                            borderRadius: 10
                                         }}>
-                                            <View style={{
-                                                backgroundColor: AppColor.CyanLight, paddingVertical: 10, paddingHorizontal: 5
-                                                , marginTop: 10, borderTopLeftRadius: 10, borderTopRightRadius: 10
-                                            }}>
-                                                <Text style={{ color: AppColor.Blue1, fontWeight: 'bold' }}>{item.Name} Room</Text></View>
-                                            <View style={{ flex: 2, flexDirection: 'row' }}>
-                                                <View style={{ flex: 1 }}>
-                                                    {item.No_Moking ? <View style={{
-                                                        flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 5,
-                                                        marginHorizontal: 5
-                                                    }}>
-                                                        <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                            source={require('../../assets/icon/NoSmoke.webp')} />
-                                                        <Text style={{ fontSize: 16, color: AppColor.Red }}>Không hút thuốc</Text>
-                                                    </View> : <View style={{
-                                                        flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 5,
-                                                        marginHorizontal: 5
-                                                    }}>
-                                                        <Image style={{ width: 24, height: 24, borderRadius: 10 }}
-                                                            source={require('../../assets/icon/NoSmoke.webp')} />
-                                                        <Text style={{ fontSize: 16, }}>Được hút thuốc</Text>
-                                                    </View>}
-
+                                            <ScrollView horizontal>
+                                                {hotel.images.filter(fitem => {
+                                                    return fitem.TypeRoom.split(';')[0] == item.id;
+                                                }).map((item, hindex) => (
+                                                    <View style={{ width: Dimensions.get('window').width - 100, marginHorizontal: 5, borderRadius: 10 }} key={hindex}>
+                                                        <Image style={{ width: '100%', height: 220, borderRadius: 10 }}
+                                                            source={{ uri: URL_Enum.BaseURL_Image + item.FileName }} />
+                                                    </View>
+                                                ))}
+                                            </ScrollView>
+                                            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.Name}</Text>
+                                            <ScrollView horizontal>
+                                                <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <IconFloorArea height="24" width="24" />
+                                                    <Text style={{ fontSize: 16, }}>{item.FloorArea} m²</Text>
                                                 </View>
-                                                <View style={{ flex: 1 }}></View>
-                                            </View>
-                                        </View>
 
-                                    </View>
+                                                <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/TreEmVaThuCung.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>{item.MaxQuantityMember} người</Text>
+                                                </View>
+
+                                                <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/giuong.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>{item.SoLuongGiuong + ' ' + item.TenLoaiGiuong}</Text>
+                                                </View>
+                                                {item.Voi_Tam_Dung ? <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/voisen.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>Vòi tắm đứng</Text>
+                                                </View> : null}
+
+                                                {item.Ban_Cong_San_Hien ? <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/bancong.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>Ban công sân hiên</Text>
+                                                </View> : null}
+
+
+                                                {item.Khu_Vuc_Cho ? <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/khuvucho.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>Ban công sân hiên</Text>
+                                                </View> : null}
+
+                                                {item.May_Lanh ? <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/maylanh.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>Máy lạnh</Text>
+                                                </View> : null}
+
+                                                {item.Nuoc_Nong ? <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/nuocnong.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>Nước nóng</Text>
+                                                </View> : null}
+
+
+                                                {item.Bon_Tam ? <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/bontam.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>Bồn tắm</Text>
+                                                </View> : null}
+
+                                                {item.Lo_Vi_Song ? <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/lovisong.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>Lò vi sóng</Text>
+                                                </View> : null}
+
+
+                                                {item.Tu_Lanh ? <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/TienNghiPhong.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>Tủ lạnh</Text>
+                                                </View> : null}
+
+
+                                                {item.May_Giat ? <View style={{
+                                                    flexDirection: 'row', borderColor: AppColor.Blue1,
+                                                    borderWidth: 1, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 5,
+                                                    marginHorizontal: 5
+                                                }}>
+                                                    <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                        source={require('../../assets/icon/maygiat.webp')} />
+                                                    <Text style={{ fontSize: 16, }}>Máy giặt</Text>
+                                                </View> : null}
+
+                                            </ScrollView>
+                                            <View style={{
+                                                borderStyle: 'solid', borderRadius: 10,
+                                                backgroundColor: AppColor.Snow1,
+                                                width: '100%',
+                                                shadowColor: AppColor.Gray31,
+                                                shadowOffset: {
+                                                    width: 1,
+                                                    height: 2,
+                                                },
+                                                shadowOpacity: 0.23,
+                                                shadowRadius: 2.62,
+                                                elevation: 4,
+                                            }}>
+                                                <View style={{
+                                                    flexDirection: 'row', flex: 5,
+                                                    backgroundColor: AppColor.CyanLight, paddingVertical: 10, paddingHorizontal: 5
+                                                    , marginTop: 10, borderTopLeftRadius: 10, borderTopRightRadius: 10
+                                                }}>
+                                                    <Text style={{ flex: 4, color: AppColor.Blue1, fontWeight: 'bold' }}>{item.Name} (Còn trống {getRoomEmpty(item.room) + '/' + item.room.length + ' phòng'})</Text>
+                                                    <View style={{ alignItems: 'center', flexDirection: 'row' }}>
+                                                        <Text style={{ color: AppColor.Blue1, textAlign: 'center' }} onPress={() => {
+                                                            setTypeRoomSelected(item);
+                                                            setListImageTypeRoomSelected(hotel.images.filter(filterItem => {
+                                                                return filterItem.TypeRoom.split(';')[0] == item.id
+                                                            }))
+                                                            setRoomModalState(true);
+                                                        }}>  Xem chi tiết</Text>
+                                                        <ArrowRight2 size="18" color={AppColor.Blue1} onPress={() => {
+                                                            setTypeRoomSelected(item);
+                                                            setListImageTypeRoomSelected(hotel.images.filter(filterItem => {
+                                                                return filterItem.TypeRoom.split(';')[0] == item.id
+                                                            }))
+                                                            setRoomModalState(true);
+                                                        }} />
+                                                    </View>
+                                                </View>
+                                                <View style={{ flex: 5, flexDirection: 'row' }}>
+                                                    <View style={{ flex: 3 }}>
+                                                        <View style={{
+                                                            flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 5,
+                                                            marginHorizontal: 5
+                                                        }}>
+                                                            <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                                source={require('../../assets/icon/buaansang.webp')} />
+                                                            <Text style={{ fontSize: 16, color: AppColor.Blue1 }}>
+                                                                {item.room?.find(fitem => { return fitem.Breakfast == true }) != undefined ? 'Bao gồm phục vụ bữa sáng' : 'Không bao gồm phục vụ bữa sáng'}</Text>
+                                                        </View>
+
+                                                        <View style={{
+                                                            flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 5,
+                                                            marginHorizontal: 5
+                                                        }}>
+                                                            <MoneySend size="24" color={AppColor.Blue1} />
+                                                            <Text style={{ fontSize: 16, color: AppColor.Blue1 }}>{item.room?.find(fitem => { return fitem.Hinh_Thuc_Thanh_Toan == '1' }) != undefined ? 'Thanh toán online' : 'Có thanh toán trực tiếp'}</Text>
+                                                        </View>
+
+                                                        {item.No_Moking ? <View style={{
+                                                            flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 5,
+                                                            marginHorizontal: 5
+                                                        }}>
+                                                            <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                                source={require('../../assets/icon/NoSmoke.webp')} />
+                                                            <Text style={{ fontSize: 16, color: AppColor.Red }}>Không hút thuốc</Text>
+                                                        </View> : <View style={{
+                                                            flexDirection: 'row', paddingHorizontal: 10, paddingVertical: 5,
+                                                            marginHorizontal: 5
+                                                        }}>
+                                                            <Image style={{ width: 24, height: 24, borderRadius: 10 }}
+                                                                source={require('../../assets/icon/NoSmoke.webp')} />
+                                                            <Text style={{ fontSize: 16, }}>Được hút thuốc</Text>
+                                                        </View>}
+
+                                                    </View>
+                                                    <View style={{ flex: 2 }}>
+                                                        <View style={{ backgroundColor: AppColor.Snow1, padding: 5 }}>
+                                                            {item.room != undefined ? GetMinDiscountByListRoom(item.room).maxDiscount > 0 ?
+                                                                <View style={{ flexDirection: 'column', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                    <View style={{ flexDirection: 'row', flex: 1, alignItems: 'center' }}>
+                                                                        <DiscountShape size="32" color="#FF8A65" />
+                                                                        <Text style={{
+                                                                            fontSize: 18, fontWeight: 'bold',
+                                                                            color: '#FF8A65'
+                                                                        }}>giảm {GetMinDiscountByListRoom(item.room).maxDiscount}%</Text>
+                                                                    </View>
+                                                                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' }}>
+                                                                        <Text style={{
+                                                                            color: AppColor.Gray31,
+                                                                            fontSize: 10,
+                                                                            textDecorationLine: 'line-through',
+                                                                            marginRight: 5
+                                                                        }}>{item.Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
+                                                                        <Text
+                                                                            style={{ color: 'red', fontWeight: 'bold', }}>
+                                                                            {(item.Price - item.Price * GetMinDiscountByListRoom(item.room).maxDiscount / 100).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Text>
+                                                                    </View>
+
+                                                                </View> :
+                                                                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' }}>
+                                                                    <Text
+                                                                        style={{ color: 'red', fontWeight: 'bold', }}>
+                                                                        {item.Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Text>
+                                                                </View>
+                                                                : null}
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            </View>
+
+                                        </View> : null
                                 ))}
                             </View>
                             : null}
 
+                    </View>
+
+                    {/* Danh gia */}
+                    <View style={{ padding: 10, borderBottomColor: AppColor.Gray31, borderBottomWidth: 0.5 }}>
+                        <Text style={{ fontSize: 18, color: AppColor.Gray31 }}>Đánh giá</Text>
+                        <RateHotelComponent listRate={listRate} avgRate={avgRate} avgRateText={avgRateText}
+                            // targetElementRefTongQuan={targetElementRefs.DanhGia}
+                            hotelId={idHotel} setListRate={setListRate} />
                     </View>
                     {/* phong*/}
                     <View style={{ marginBottom: 100 }}>
@@ -562,6 +658,8 @@ const DetailHotel: React.FC<ScreenProps> = () => {
                         listPolicy={hotel?.policies} timeCheckin={hotel?.TimeCheckIn} timeCheckout={hotel?.TimeCheckOut} />
                     <ListImageModal listImage={listImage} listImageModalState={listImageModalState}
                         setListImageModalState={setListImageModalState} />
+                    <RoomModal roomModalState={roomModalState} setRoomModalState={setRoomModalState}
+                        typeRoomSelected={typeRoomSelected} listImageTypeRoomSelected={listImageTypeRoomSelected} />
                 </View>
             </View>
     )

@@ -5,7 +5,7 @@ interface IPops {
     height: string;
 }
 export default function IconFloorArea(props: IPops) {
-    const { height, width } = props
+    const { height, width } = props;
     return (
         <Svg width={width} height={height} viewBox="0 0 24 24" fill="none"
             data-id="IcHotelRoomMeasure">

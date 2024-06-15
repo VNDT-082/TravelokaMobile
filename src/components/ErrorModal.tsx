@@ -1,4 +1,4 @@
-import { TickCircle } from "iconsax-react-native";
+import { CloseCircle, TickCircle, Warning2 } from "iconsax-react-native";
 import { Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AppColor } from "../assets/AppColor";
 import { BottomSheetAndroid } from "@react-navigation/stack/lib/typescript/src/TransitionConfigs/TransitionPresets";
@@ -19,6 +19,7 @@ export default function ErrorModal(props: IProps) {
             navigation.goBack();
             setErrorModalState(false);
         }
+        setErrorModalState(false);
     }
     return (
         <View>
@@ -41,7 +42,10 @@ export default function ErrorModal(props: IProps) {
                         <View style={{
                             justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%',
                         }}>
-                            <TickCircle size="128" color={AppColor.Green31} />
+
+                            {typeNotify == 'Warning' ? <Warning2 size="128" color="#FF8A65" /> :
+                                typeNotify == 'Sucsess' ? <TickCircle size="128" color={AppColor.Green31} /> :
+                                    <CloseCircle size="128" color="#f47373" />}
                             <Text style={{
                                 fontSize: 18, color: AppColor.Gray31, textAlign: 'center'
                             }}>{errorDes}</Text>
@@ -57,11 +61,10 @@ export default function ErrorModal(props: IProps) {
                                 }}>
                                 <Text style={{
                                     fontWeight: 'semibold',
-                                    color: AppColor.Cyan,
+                                    color: typeNotify == 'Warning' ? '#FF8A65' : typeNotify == 'Sucsess' ? AppColor.Green31 : '#f47373',
                                     textAlign: 'center',
                                     backgroundColor: AppColor.white,
-                                    borderColor: typeNotify == 'Error' ? AppColor.Red
-                                        : typeNotify == 'Sucsess' ? AppColor.Green31 : AppColor.Orage,
+                                    borderColor: typeNotify == 'Warning' ? '#FF8A65' : typeNotify == 'Sucsess' ? AppColor.Green31 : '#f47373',
                                     borderWidth: 1, borderRadius: 10,
                                     paddingHorizontal: 40, paddingVertical: 15,
                                     position: 'absolute', bottom: 0
