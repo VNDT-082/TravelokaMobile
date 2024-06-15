@@ -10,20 +10,21 @@ import URL_Enum from "../axios/URL_Enum";
 interface IPops {
     descrionAndPolicyModalState: boolean,
     setDescrionAndPolicyModalState: (descrionAndPolicyModal: boolean) => void;
-    typeOpenState: 'MoTa' | 'ChinhSach',
-    setTypeOpenState: (typeOpenState: 'MoTa' | 'ChinhSach') => void;
-    description: string,
+    typeOpenState: 'MoTa' | 'ChinhSach' | 'TienIch';
+    setTypeOpenState: (typeOpenState: 'MoTa' | 'ChinhSach' | 'TienIch') => void;
+    description: string;
     listPolicy?: IPolicy[];
+    listConvenient?: IConvenient[];
     timeCheckin?: string;
     timeCheckout?: string;
 }
 export default function DescrionAndPolicyModal(props: IPops) {
     const { descrionAndPolicyModalState, setDescrionAndPolicyModalState, typeOpenState, setTypeOpenState
-        , description, listPolicy, timeCheckin, timeCheckout } = props;
+        , description, listPolicy, timeCheckin, timeCheckout, listConvenient } = props;
     const toggleModal = () => {
         setDescrionAndPolicyModalState(false);
     }
-    const handleChangTypeLocation = (title: 'MoTa' | 'ChinhSach') => {
+    const handleChangTypeLocation = (title: 'MoTa' | 'ChinhSach' | 'TienIch') => {
         setTypeOpenState(title);
     }
     return (
@@ -75,6 +76,12 @@ export default function DescrionAndPolicyModal(props: IPops) {
                                 borderBottomWidth: typeOpenState == 'ChinhSach' ? 5 : 0,
                                 fontWeight: typeOpenState == 'ChinhSach' ? 'bold' : 'normal'
                             }} onPress={() => handleChangTypeLocation('ChinhSach')}>Chính sách</Text>
+                            <Text style={{
+                                flex: 1, textAlign: 'center', height: 50, color: AppColor.white, paddingTop: 15,
+                                borderBottomColor: typeOpenState == 'TienIch' ? AppColor.Blue1 : 'transparent',
+                                borderBottomWidth: typeOpenState == 'TienIch' ? 5 : 0,
+                                fontWeight: typeOpenState == 'TienIch' ? 'bold' : 'normal'
+                            }} onPress={() => handleChangTypeLocation('TienIch')}>Tiện ích</Text>
                         </View>
                         <ScrollView style={{ maxHeight: Dimensions.get('window').height - 300 }}>
 
@@ -120,6 +127,33 @@ export default function DescrionAndPolicyModal(props: IPops) {
                                 </View>
                                     : <Text>Chính sách của khách sạn không có sẵn</Text>}
 
+                            </View>
+
+                            <View style={{ display: typeOpenState == 'TienIch' ? 'flex' : 'none' }}>
+                                {/* Tất cả tiện ích*/}
+                                {listConvenient != undefined ?
+                                    <View style={{ padding: 10, }}>
+                                        <Text style={{ fontSize: 18, color: AppColor.Gray31 }}>Tất cả tiện ích</Text>
+                                        {listConvenient.map((citem, cindex) => (
+                                            <View key={cindex}>
+                                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                                    <View style={{ width: 18, height: 18, marginVertical: 10, }} >
+                                                        <Image style={{ width: '100%', height: 18, }}
+                                                            source={{ uri: URL_Enum.BaseURL_Image_Icon + citem.ImageIcon }} />
+                                                    </View>
+                                                    <Text style={{ fontSize: 16 }}>{citem.Title}</Text>
+                                                </View>
+                                                {citem.Description.map((ditem, dindex) => (
+                                                    <View key={dindex} style={{ alignItems: 'center', gap: 2, flexDirection: 'row' }}>
+                                                        <View style={{ width: 7, height: 7, borderRadius: 10, backgroundColor: AppColor.Gray31 }}></View>
+                                                        <Text style={{ fontSize: 15 }}>{ditem}</Text></View>
+
+
+                                                ))}
+                                            </View>
+                                        ))}
+                                    </View>
+                                    : null}
                             </View>
                         </ScrollView>
                     </View>

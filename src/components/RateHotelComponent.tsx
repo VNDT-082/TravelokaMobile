@@ -1,6 +1,12 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { Dimensions, Image, ScrollView, Text, View } from "react-native";
 import FormRateHotel from "./form/FormRateHotel";
+import ShortBotomModal from "./ShortBotomModal";
+import { FilterTick } from "iconsax-react-native";
+import { AppColor } from "../assets/AppColor";
+import URL_Enum from "../axios/URL_Enum";
+import FormatDateDDD from "../service/FormatDateDDD";
+import FormatDate from "../service/FormatDateString";
 
 interface IProps {
     listRate?: IRate[];
@@ -25,6 +31,8 @@ export default function RateHotelComponent(props: IProps) {
     const [rateConvenient, setRateConvenient] = useState<number>(0);
     const [rateService, setRateService] = useState<number>(0);
     const [rateClearnUp, setRateClearnUp] = useState<number>(0);
+
+    const [shortBotomModalState, setShortBotomModalState] = useState<boolean>(false);
 
 
     const [modalImageRateState, setModalImageRateState] = useState<boolean>(false);
@@ -90,55 +98,6 @@ export default function RateHotelComponent(props: IProps) {
     }
     TinhMucDoHaiLong();
 
-    const handleClickFilterRate = (filter: string, existImage: boolean) => {
-        if (listRate != undefined) {
-            if (filter == 'Gần đây nhất') {
-                setListRateTemp(
-                    existImage ? listRate.filter((item) => {
-                        return item.HinhAnh != null;
-                    }).sort((a, b) => {
-                        const dateA = new Date(a.created_at);
-                        const dateB = new Date(b.created_at);
-                        return dateB.getTime() - dateA.getTime();
-                    })
-                        : listRate.sort((a, b) => {
-                            const dateA = new Date(a.created_at);
-                            const dateB = new Date(b.created_at);
-                            return dateB.getTime() - dateA.getTime();
-                        })
-                );
-            }
-            else if (filter == 'Điểm (Từ cao đến thấp)') {
-                existImage ? setListRateTemp(
-                    listRate.filter((item) => {
-                        return item.HinhAnh != null;
-                    }).sort((a, b) => b.Rating - a.Rating)
-                )
-                    : setListRateTemp(
-                        listRate.sort((a, b) => b.Rating - a.Rating)
-                    );
-            }
-            else if (filter == 'Điểm (từ thấp đến cao)') {
-                setListRateTemp(
-                    existImage ? listRate.filter((item) => {
-                        return item.HinhAnh != null;
-                    }).sort((a, b) => a.Rating - b.Rating)
-                        : listRate.sort((a, b) => a.Rating - b.Rating)
-                );
-
-            }
-            else if (filter == 'Tất cả') {
-                setListRateTemp(listRate ? listRate : []);
-            }
-            else {
-                setListRateTemp(
-                    existImage ? listRate : listRate.filter((item) => {
-                        return item.HinhAnh != null;
-                    }));
-            }
-        }
-
-    }
     return (
         <View>
             <FormRateHotel rateStar={rateStar} setRateStar={setRateStar}
@@ -147,6 +106,63 @@ export default function RateHotelComponent(props: IProps) {
                 rateClearnUp={rateClearnUp} setRateClearnUp={setRateClearnUp}
                 hotelId={`${hotelId}`} listRate={listRate}
                 setListRate={setListRate} setListRateTemp={setListRateTemp} />
+            <View style={{ flexDirection: 'row', marginVertical: 10 }}>
+                <FilterTick size="36" color="#697689" variant="Bold" onPress={() => setShortBotomModalState(true)} />
+                <View>
+                    <Text>Sắp xếp theo</Text>
+                    <Text style={{ color: AppColor.Blue1 }}>{hienFilterRate}</Text>
+                </View>
+            </View>
+            <View>
+                {listRateTemp.map((item, index) => (
+                    <View key={index} style={{
+                        marginTop: 5,
+                        width: '95%', margin: 'auto', padding: 5,
+                        borderStyle: 'solid', borderRadius: 10,
+                        backgroundColor: AppColor.Snow1,
+                        shadowColor: '#000',
+                        shadowOffset: {
+                            width: 1,
+                            height: 2,
+                        },
+                        shadowOpacity: 0.23,
+                        shadowRadius: 2.62,
+                        elevation: 4,
+                        marginVertical: 5
+                    }}>
+                        <View style={{
+                            flexDirection: 'row', alignItems: 'center',
+                        }}>
+                            <View style={{ width: 50, height: 50, marginVertical: 10, borderRadius: 10 }} key={index}>
+                                <Image style={{ width: '100%', height: 50, borderRadius: 10 }}
+                                    source={{ uri: URL_Enum.BaseURL_Avarta + item.guest.Avarta }} />
+                            </View>
+                            <View>
+                                <Text>{item.guest.Name}</Text>
+                                <Text style={{ fontSize: 12 }}>{FormatDate(item.created_at)}</Text>
+                            </View>
+
+                        </View>
+                        <Text>{item.Description}</Text>
+                        {item.HinhAnh != undefined && item.HinhAnh != null && item.HinhAnh != '' ?
+                            <ScrollView horizontal>
+                                {item.HinhAnh?.split(';').map((hitem, hindex) => (
+                                    <View style={{ width: 280, marginVertical: 10, borderRadius: 10, marginHorizontal: 2.5 }} key={hindex}>
+                                        <Image style={{ width: '100%', height: 150, borderRadius: 10 }}
+                                            source={{ uri: URL_Enum.BaseURL_Rate + hitem }} />
+                                    </View>
+                                ))}
+                            </ScrollView> : null}
+
+                    </View>
+                ))}
+            </View>
+
+            <View>
+                <ShortBotomModal shortBotomModalState={shortBotomModalState} setShortBotomModalState={setShortBotomModalState}
+                    hienFilterRate={hienFilterRate} setHienFilterRate={setHienFilterRate} listRate={listRate}
+                    setListRateTemp={setListRateTemp} listRateTemp={listRateTemp} />
+            </View>
         </View>
     )
 }

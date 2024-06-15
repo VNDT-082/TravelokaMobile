@@ -1,5 +1,4 @@
 
-import { Star1 } from 'iconsax-react-native';
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';

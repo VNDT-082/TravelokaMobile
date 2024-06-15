@@ -32,7 +32,7 @@ const DetailHotel: React.FC<ScreenProps> = () => {
     const [typeLocationState, setTypeLocationState] = useState<'DiaDiemLanCan' | 'DiaDiemPhoBien'>('DiaDiemLanCan');
     const [titleState, setTitleState] = useState<'TongQuan' | 'Phong' | 'ViTri' | 'TienIch' | 'ChinhSach' | 'DanhGia'>('TongQuan');
     const { idHotel } = route.params;
-    console.log('idHotel', idHotel)
+
     const [hotel, setHotel] = useState<IHotel>();
     const [listDiaDiemLanCan, setListDiaDiemLanCan] = useState<IDiaDiemLanCan[]>([])
     const [errorModalState, setErrorModalState] = useState<boolean>(false);
@@ -42,8 +42,8 @@ const DetailHotel: React.FC<ScreenProps> = () => {
     const [listImage, setListImage] = useState<IHotelImage[]>([]);
     const [listImageTypeRoomSelected, setListImageTypeRoomSelected] = useState<IHotelImage[]>([]);
     const [typeRoomSelected, setTypeRoomSelected] = useState<ITypeRoom>();
-    const arrTypeOpenState: string[] = ['MoTa', 'ChinhSach'];
-    const [typeOpenState, setTypeOpenState] = useState<'MoTa' | 'ChinhSach'>('MoTa');
+    const arrTypeOpenState: string[] = ['MoTa', 'ChinhSach', 'TienIch'];
+    const [typeOpenState, setTypeOpenState] = useState<'MoTa' | 'ChinhSach' | 'TienIch'>('MoTa');
     const [errorDes, setErrorDes] = useState<string>('')
     const [typeNotify, setTypeNotify] = useState<'Error' | 'Sucsess' | 'Warning'>('Sucsess');
 
@@ -302,6 +302,41 @@ const DetailHotel: React.FC<ScreenProps> = () => {
                             setDescrionAndPolicyModalState(true)
                         }}>Xem chi tiết</Text>
                     </View>
+
+                    {/* Tất cả tiện ích*/}
+                    {hotel?.convenients != undefined ?
+                        <View style={{ padding: 10, }}>
+                            <Text style={{ fontSize: 18, color: AppColor.Gray31 }}>Tất cả tiện ích</Text>
+                            {hotel.convenients.slice(0, 3).map((citem, cindex) => (
+                                <View key={cindex}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <View style={{ width: 18, height: 18, marginVertical: 10, }} >
+                                            <Image style={{ width: '100%', height: 18, }}
+                                                source={{ uri: URL_Enum.BaseURL_Image_Icon + citem.ImageIcon }} />
+                                        </View>
+                                        <Text style={{ fontSize: 16 }}>{citem.Title}</Text>
+                                    </View>
+                                    {citem.Description.slice(0, 5).map((ditem, dindex) => (
+                                        <View style={{ alignItems: 'center', gap: 2, flexDirection: 'row' }}>
+                                            <View style={{ width: 7, height: 7, borderRadius: 10, backgroundColor: AppColor.Gray31 }}></View>
+                                            <Text key={dindex} style={{ fontSize: 15 }}>{ditem}</Text></View>
+
+
+                                    ))}
+                                </View>
+                            ))}
+
+                            <Text style={{
+                                borderBottomColor: AppColor.Gray31, borderBottomWidth: 0.5,
+                                fontSize: 16, fontWeight: 'bold', color: AppColor.Blue1, textAlign: 'center',
+                                textDecorationColor: 'undefined'
+                            }} onPress={() => {
+                                setTypeOpenState("TienIch")
+                                setDescrionAndPolicyModalState(true)
+                            }}>Xem chi tiết</Text>
+                        </View>
+                        : null}
+
 
                     {/* Chinh sach luu tru */}
                     {hotel?.policies != undefined ?
@@ -638,7 +673,7 @@ const DetailHotel: React.FC<ScreenProps> = () => {
                     {/* Danh gia */}
                     <View style={{ padding: 10, borderBottomColor: AppColor.Gray31, borderBottomWidth: 0.5 }}>
                         <Text style={{ fontSize: 18, color: AppColor.Gray31 }}>Đánh giá</Text>
-                        <RateHotelComponent listRate={listRate} avgRate={avgRate} avgRateText={avgRateText}
+                        <RateHotelComponent listRate={hotel?.rates} avgRate={avgRate} avgRateText={avgRateText}
                             // targetElementRefTongQuan={targetElementRefs.DanhGia}
                             hotelId={idHotel} setListRate={setListRate} />
                     </View>
@@ -654,7 +689,7 @@ const DetailHotel: React.FC<ScreenProps> = () => {
                     <DescrionAndPolicyModal descrionAndPolicyModalState={descrionAndPolicyModalState}
                         setDescrionAndPolicyModalState={setDescrionAndPolicyModalState}
                         description={hotel?.Description != undefined ? hotel.Description : ""}
-                        setTypeOpenState={setTypeOpenState} typeOpenState={typeOpenState}
+                        setTypeOpenState={setTypeOpenState} typeOpenState={typeOpenState} listConvenient={hotel?.convenients}
                         listPolicy={hotel?.policies} timeCheckin={hotel?.TimeCheckIn} timeCheckout={hotel?.TimeCheckOut} />
                     <ListImageModal listImage={listImage} listImageModalState={listImageModalState}
                         setListImageModalState={setListImageModalState} />

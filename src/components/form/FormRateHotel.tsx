@@ -1,9 +1,21 @@
 import { useEffect, useState } from "react";
-import { FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Button, Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import GenerateId from "../../service/generateId";
 import { addNewRate } from "../../service/ratehotel.service";
 // Import Document Picker
 import DocumentPicker from 'react-native-document-picker';
+//import {launchImageLibrary} from 'react-native-image-picker';
+import { launchImageLibrary as _launchImageLibrary, launchCamera as _launchCamera, CameraOptions, ImageLibraryOptions } from 'react-native-image-picker';
+import { AppColor } from "../../assets/AppColor";
+import { CloseSquare } from "iconsax-react-native";
+import { TextInput } from "react-native-paper";
+import { Rating } from "@rneui/themed";
+import RateStar from "./RateStar";
+import RateClearnUp from "./RateStarClearnUp";
+import RateStarService from "./RateStarService";
+import RateStarConvenient from "./RateStarConvenient";
+let launchImageLibrary = _launchImageLibrary;
+let launchCamera = _launchCamera;
 interface IProps {
     rateStar: number,
     setRateStar: (rataStar: number) => void,
@@ -97,144 +109,103 @@ export default function FormRateHotel(props: IProps) {
 
     // const [photos, setPhotos] = useState<PhotoNode[]>([]);
     // const [selectedPhotos, setSelectedPhotos] = useState<PhotoNode[]>([]);
+    const [selectedImage, setSelectedImage] = useState<string[]>([]);
+    const openImagePicker = () => {
+        const options: ImageLibraryOptions = {
+            mediaType: 'photo',
+            includeBase64: false,
+            maxHeight: 2000,
+            maxWidth: 2000,
+            selectionLimit: 0,
 
-    const [singleFile, setSingleFile] = useState<any>(null);
+        };
 
-    const uploadImage = async () => {
-        // Check if any file is selected or not
-        if (singleFile != null) {
-            // If file selected then create FormData
-            const fileToUpload = singleFile;
-            const data = new FormData();
-            data.append('name', 'Image Upload');
-            data.append('file_attachment', fileToUpload);
-            // Please change file upload URL
-            let res = await fetch(
-                'http://localhost/upload.php',
-                {
-                    method: 'post',
-                    body: data,
-                    headers: {
-                        'Content-Type': 'multipart/form-data; ',
-                    },
-                }
-            );
-            let responseJson = await res.json();
-            if (responseJson.status == 1) {
-                //('Upload Successful');
-            }
+        launchImageLibrary(options, handleResponse);
+    };
+
+    // const handleCameraLaunch = () => {
+    //     const options: CameraOptions = {
+    //         mediaType: 'photo',
+    //         includeBase64: false,
+    //         maxHeight: 2000,
+    //         maxWidth: 2000,
+    //     };
+
+    //     launchCamera(options, handleResponse);
+    // };
+
+    const handleResponse = (response: any) => {
+        if (response.didCancel) {
+            console.log('User cancelled image picker');
+        } else if (response.error) {
+            console.log('Image picker error: ', response.error);
         } else {
-            // If no file selected the show alert
-            //alert('Please Select File first');
+            const selectedImages = response.assets.map((asset: any) => asset.uri);
+            console.log('Selected images:', selectedImages);
+            setSelectedImage(selectedImages);
         }
     };
-
-    const selectFile = async () => {
-        // Opening Document Picker to select one file
-        try {
-            const res = await DocumentPicker.pick({
-                // Provide which type of file you want user to pick
-                type: [DocumentPicker.types.allFiles],
-                // There can me more options as well
-                // DocumentPicker.types.allFiles
-                // DocumentPicker.types.images
-                // DocumentPicker.types.plainText
-                // DocumentPicker.types.audio
-                // DocumentPicker.types.pdf
-            });
-            // Printing the log realted to the file
-            console.log('res : ' + JSON.stringify(res));
-            // Setting the state to show single file attributes
-            setSingleFile(res);
-        } catch (err) {
-            setSingleFile(null);
-            // Handling any exception (If any)
-            if (DocumentPicker.isCancel(err)) {
-                // If user canceled the document selection
-                console.log('Canceled');
-            } else {
-                // For Unknown Error
-                console.log('Unknown Error: ' + JSON.stringify(err));
-                throw err;
-            }
-        }
+    const ratingCompleted = (rating: number) => {
+        console.log('Rating is: ' + rating);
     };
-
 
     return (
-        <View style={styles.mainBody}>
-            <View style={{ alignItems: 'center' }}>
-                <Text style={{ fontSize: 30, textAlign: 'center' }}>
-                    React Native File Upload Example
-                </Text>
-                <Text
-                    style={{
-                        fontSize: 25,
-                        marginTop: 20,
-                        marginBottom: 30,
-                        textAlign: 'center',
-                    }}>
-                    www.aboutreact.com
-                </Text>
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+            <Text>Nhập đánh giá của bạn</Text>
+            <TextInput
+                style={{ borderColor: AppColor.BlueDark, borderRadius: 5, borderWidth: 1, backgroundColor: AppColor.white }}
+                onChangeText={(value: string) => setDescription(value)}
+                multiline
+                value={description}
+            />
+
+            <View style={{
+                padding: 5, borderWidth: 1, borderColor: AppColor.Blue1, borderRadius: 5, marginVertical: 10,
+                shadowColor: AppColor.Blue1,
+                shadowOffset: {
+                    width: 1,
+                    height: 2,
+                },
+                shadowOpacity: 0.23,
+                shadowRadius: 2.62,
+                elevation: 1,
+            }}>
+                <View style={{ paddingHorizontal: 35, }}><Text style={{ fontSize: 18, flex: 1 }}>Đánh giá của bạn</Text>
+                    <RateStar rateStar={rateStar} setRateStar={setRateStar} /></View>
+
+                <View style={{ paddingHorizontal: 30, flexDirection: 'row', alignItems: 'center', marginVertical: 5, flex: 5, justifyContent: 'flex-start' }}><Text style={{ fontSize: 18, flex: 2 }}>Mức độ sạch sẽ:</Text><RateClearnUp rateClearnUp={rateClearnUp} setRateClearnUp={setRateClearnUp} /></View>
+                <View style={{ paddingHorizontal: 30, flexDirection: 'row', alignItems: 'center', marginVertical: 5, flex: 5, justifyContent: 'flex-start' }}><Text style={{ fontSize: 18, flex: 2 }}>Mức độ dịch vụ:</Text><RateStarService rateService={rateService} setRateService={setRateService} /></View>
+                <View style={{ paddingHorizontal: 30, flexDirection: 'row', alignItems: 'center', marginVertical: 5, flex: 5, justifyContent: 'flex-start' }}><Text style={{ fontSize: 18, flex: 2 }}>Mức độ thoải mái:</Text><RateStarConvenient rateConvenient={rateConvenient} setRateConvenient={setRateConvenient} /></View>
             </View>
-            {/*Showing the data of selected Single file*/}
-            {singleFile != null ? (
-                <Text style={styles.textStyle}>
-                    File Name: {singleFile.name ? singleFile.name : ''}
-                    {'\n'}
-                    Type: {singleFile.type ? singleFile.type : ''}
-                    {'\n'}
-                    File Size: {singleFile.size ? singleFile.size : ''}
-                    {'\n'}
-                    URI: {singleFile.uri ? singleFile.uri : ''}
-                    {'\n'}
-                </Text>
-            ) : null}
-            <TouchableOpacity
-                style={styles.buttonStyle}
-                activeOpacity={0.5}
-                onPress={selectFile}>
-                <Text style={styles.buttonTextStyle}>Select File</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={styles.buttonStyle}
-                activeOpacity={0.5}
-                onPress={uploadImage}>
-                <Text style={styles.buttonTextStyle}>Upload File</Text>
-            </TouchableOpacity>
+            {selectedImage && (
+                <ScrollView horizontal>
+                    {selectedImage.map((item, index) => (
+                        <View key={index} style={{
+                            width: Dimensions.get('window').width - 90,
+                            backgroundColor: AppColor.CyanLight, marginHorizontal: 2.5
+                        }}>
+                            <Image
+                                source={{ uri: item }}
+                                style={{ width: '100%', height: 220, borderRadius: 5 }}
+                                resizeMode="cover"
+                            />
+                            <CloseSquare size="32" color="#f47373" variant="Bold" style={{
+                                position: 'absolute',
+                                top: 10, right: 10
+                            }} onPress={() => {
+                                setSelectedImage(selectedImage.filter(fitem => { return fitem != item }))
+                            }} />
+                        </View>
+                    ))}
+                </ScrollView>
+
+            )}
+            <View style={{ marginTop: 20 }}>
+                <Button title="Chọn ảnh" onPress={openImagePicker} />
+            </View>
+            {/* <View style={{ marginTop: 20, marginBottom: 50 }}>
+                <Button title="Open Camera" onPress={handleCameraLaunch} />
+            </View> */}
         </View>
     );
 };
-
-const styles = StyleSheet.create({
-    mainBody: {
-        flex: 1,
-        justifyContent: 'center',
-        padding: 20,
-    },
-    buttonStyle: {
-        backgroundColor: '#307ecc',
-        borderWidth: 0,
-        color: '#FFFFFF',
-        borderColor: '#307ecc',
-        height: 40,
-        alignItems: 'center',
-        borderRadius: 30,
-        marginLeft: 35,
-        marginRight: 35,
-        marginTop: 15,
-    },
-    buttonTextStyle: {
-        color: '#FFFFFF',
-        paddingVertical: 10,
-        fontSize: 16,
-    },
-    textStyle: {
-        backgroundColor: '#fff',
-        fontSize: 15,
-        marginTop: 16,
-        marginLeft: 35,
-        marginRight: 35,
-        textAlign: 'center',
-    },
-});
