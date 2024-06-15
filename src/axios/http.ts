@@ -4,7 +4,7 @@ class Http {
   instance: AxiosInstance
   constructor() {
     this.instance = axios.create({
-      baseURL: 'http://172.16.14.98:8000/api/',
+      baseURL: 'http://172.16.39.222:8000/api/',
       headers: {
         "X-Requested-With": "XMLHttpRequest",
         'Access-Control-Allow-Origin': '*',

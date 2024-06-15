@@ -12,3 +12,16 @@ export const getTop10New = async (): Promise<any> => {
         return false;
     }
 }
+
+export const getOneHotelByID = async (id: string): Promise<any> => {
+    try {
+        const response = await http.get(`hotel/get-one-by-id?id=${id}`);
+        if (response.status === 200) {
+            return response.data.result;
+        }
+    }
+    catch (error) {
+        console.log('error', error);
+        return false;
+    }
+}

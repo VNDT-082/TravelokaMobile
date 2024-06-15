@@ -1,6 +1,5 @@
 import { View, Text, ScrollView, Image, ActivityIndicator, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import HeaderMenu from '../../components/HeaderMenu';
 import { AppColor } from '../../assets/AppColor';
 import URL_Enum from '../../axios/URL_Enum';
 import { GetListProvinceDefault } from '../../service/province.service';
@@ -66,7 +65,7 @@ const HomeScreen = () => {
             .finally(() => { setIsLoading(false) });
     }, []);
     const handleProvinceOptionChange = (id_province: string): void => {
-        setSelectedProvinceOption(id_province); // Cập nhật giá trị của radio button được chọn
+        setSelectedProvinceOption(id_province); //Cập nhật giá trị của radio button được chọn
     };
     const handleClickHotel = (id: string) => {
         navigation.navigate('DetailHotel', { idHotel: id })

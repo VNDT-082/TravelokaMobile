@@ -16,4 +16,6 @@ export const AppColor = {
     Green31: '#009900',
     white: '#FFFFFF',
     BlueDark: '#235C9F',
+    Red: '#FF0000',
+    Yellow01: '#FFFF66',
 }
