@@ -129,7 +129,7 @@ const HeaderMenu = (props: IPops) => {
                             fontSize: 18, fontWeight: 'semibold', color: AppColor.white,
                             borderWidth: 1, borderColor: AppColor.white, borderRadius: 100, textAlign: 'center',
                             paddingHorizontal: 20, paddingVertical: 5, marginHorizontal: 10
-                        }}>{arrStarSelected[arrStarSelected.length - 1]}
+                        }}>{arrStarSelected != undefined && arrStarSelected[arrStarSelected.length - 1]}
                             <Icon name='star' size={18} color="#FFCC00" />
                         </Text>
                         {arrConvenientSelected != undefined && arrConvenientSelected.length > 0 ?

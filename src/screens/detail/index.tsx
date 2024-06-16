@@ -317,9 +317,9 @@ const DetailHotel: React.FC<ScreenProps> = () => {
                                         <Text style={{ fontSize: 16 }}>{citem.Title}</Text>
                                     </View>
                                     {citem.Description.slice(0, 5).map((ditem, dindex) => (
-                                        <View style={{ alignItems: 'center', gap: 2, flexDirection: 'row' }}>
+                                        <View style={{ alignItems: 'center', gap: 2, flexDirection: 'row' }} key={dindex}>
                                             <View style={{ width: 7, height: 7, borderRadius: 10, backgroundColor: AppColor.Gray31 }}></View>
-                                            <Text key={dindex} style={{ fontSize: 15 }}>{ditem}</Text></View>
+                                            <Text style={{ fontSize: 15 }}>{ditem}</Text></View>
 
 
                                     ))}
@@ -575,13 +575,16 @@ const DetailHotel: React.FC<ScreenProps> = () => {
                                                 }}>
                                                     <Text style={{ flex: 4, color: AppColor.Blue1, fontWeight: 'bold' }}>{item.Name} (Còn trống {getRoomEmpty(item.room) + '/' + item.room.length + ' phòng'})</Text>
                                                     <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-                                                        <Text style={{ color: AppColor.Blue1, textAlign: 'center' }} onPress={() => {
+                                                        <TouchableOpacity onPress={() => {
                                                             setTypeRoomSelected(item);
                                                             setListImageTypeRoomSelected(hotel.images.filter(filterItem => {
                                                                 return filterItem.TypeRoom.split(';')[0] == item.id
                                                             }))
                                                             setRoomModalState(true);
-                                                        }}>  Xem chi tiết</Text>
+                                                        }}>
+                                                            <Text style={{ color: AppColor.Blue1, textAlign: 'center' }} >  Xem chi tiết</Text>
+                                                        </TouchableOpacity>
+
                                                         <ArrowRight2 size="18" color={AppColor.Blue1} onPress={() => {
                                                             setTypeRoomSelected(item);
                                                             setListImageTypeRoomSelected(hotel.images.filter(filterItem => {

@@ -8,6 +8,7 @@ import { useState } from "react";
 import PolicyChangeAndCancelOrderModal from "./PolicyChangeAndCancelOrderModal";
 import ErrorModal from "./ErrorModal";
 import FormatDate from "../service/FormatDateString";
+import { useNavigation } from "@react-navigation/native";
 
 interface IPops {
     roomModalState: boolean,
@@ -16,6 +17,7 @@ interface IPops {
     listImageTypeRoomSelected?: IHotelImage[];
 }
 export default function RoomModal(props: IPops) {
+    const navigation = useNavigation();
     const [errorModalState, setErrorModalState] = useState<boolean>(false);
     const { roomModalState, setRoomModalState, typeRoomSelected, listImageTypeRoomSelected } = props;
     const [policyChangeAndCancelOrderModalState, setPolicyChangeAndCancelOrderModalState] = useState<boolean>(false);
@@ -492,7 +494,10 @@ export default function RoomModal(props: IPops) {
                                                             color: AppColor.white, textAlign: 'center',
                                                             backgroundColor: '#FFC125', paddingVertical: 5,
                                                             borderRadius: 5
-                                                        }}>Đặt phòng này</Text>
+                                                        }}
+                                                            onPress={() => {
+                                                                navigation.navigate('BookingHotel', { idRoom: item?.id })
+                                                            }}>Đặt phòng này</Text>
                                                     </TouchableOpacity>
                                                 </View>
 

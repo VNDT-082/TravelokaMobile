@@ -103,10 +103,10 @@ const HomeScreen = () => {
                             <ScrollView horizontal={true}>
                                 <View style={{ flexDirection: 'row', width: '100%' }}>
                                     {listProvince != undefined ? listProvince.map((item, index) => (
-                                        <View style={{ width: 200, padding: 5 }}>
+                                        <View style={{ width: 200, padding: 5 }} key={index}>
                                             <Image style={{ width: '100%', height: 240, borderRadius: 5 }}
                                                 source={{ uri: URL_Enum.BaseURL_ImageProvince + item.Image }}
-                                                key={index} />
+                                            />
                                         </View>
                                     )) : null}
                                 </View>
@@ -150,10 +150,10 @@ const HomeScreen = () => {
                                 }}>
                                     {listProvince != undefined ? listProvince.filter((fitem) => {
                                         return fitem.id == selectedProvinceOption
-                                    }).map((item) => (
-                                        item.hotels?.map((hitem) => (
+                                    }).map((item, index) => (
+                                        item.hotels?.map((hitem, hindex) => (
                                             <TouchableOpacity style={{ marginLeft: 10 }}
-                                                onPress={() => { handleClickHotel(hitem.id) }}>
+                                                onPress={() => { handleClickHotel(hitem.id) }} key={hindex}>
                                                 <View style={{
                                                     width: 200, position: 'relative',
                                                     shadowColor: '#000',
@@ -256,10 +256,9 @@ const HomeScreen = () => {
                                 , marginLeft: 5
                             }}>Mã giảm giá</Text>
                             <ScrollView horizontal={true} style={{ padding: 10 }}>
-                                {listPoster.map(item => (
-                                    <TouchableOpacity style={{ marginLeft: 10 }}
+                                {listPoster.map((item, index) => (
+                                    <TouchableOpacity key={index} style={{ marginLeft: 10 }}
                                         onPress={() => {
-
                                         }}>
                                         <View style={{
                                             justifyContent: 'center', alignItems: 'center', backgroundColor: 'white',

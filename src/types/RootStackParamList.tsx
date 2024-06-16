@@ -11,5 +11,8 @@ type RootStackParamList = {
     DetailHotel: {
         idHotel: string;
     };
+    BookingHotel: {
+        idRoom: string;
+    };
 };
 

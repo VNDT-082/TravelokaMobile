@@ -22,6 +22,8 @@ import TabNavigator from './src/navigators/TabNavigator';
 import Login from './src/screens/login';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DetailHotel from './src/screens/detail';
+import BookingHotelSrceen from './src/screens/booking';
+import Signup from './src/screens/signup';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -74,10 +76,23 @@ function App(): React.JSX.Element {
           options={{ headerShown: false }}
         />
         <RootStack.Screen
+          name="Signup"
+          component={Signup}
+          options={{ headerShown: false }}
+        />
+        <RootStack.Screen
           name="DetailHotel"
           component={DetailHotel}
           initialParams={{
             idHotel: null,
+          }}
+          options={{ headerShown: false }}
+        />
+        <RootStack.Screen
+          name="BookingHotel"
+          component={BookingHotelSrceen}
+          initialParams={{
+            idRoom: null,
           }}
           options={{ headerShown: false }}
         />

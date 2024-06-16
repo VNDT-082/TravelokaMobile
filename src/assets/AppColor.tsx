@@ -8,7 +8,7 @@ export const AppColor = {
     Snow1: '#FFFAFA',
     TextLight: '#222222',
     TextDark: '#EEEEEE',
-    Orage: 'FF8A65',
+    Orage: '#ff8a65',
     Gray01: '#EEEEEE',
     Cyan: '#06BCEE',
     CyanLight: '#D9F2FF',

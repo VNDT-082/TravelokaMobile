@@ -6,9 +6,11 @@ import {
     StyleSheet,
     TouchableWithoutFeedback,
 } from 'react-native';
+import { AppColor } from '../../assets/AppColor';
 
 export default function Input(props: any) {
     const {
+        value, setValue,
         placeholder,
         secure = false,
         leadingIcon,
@@ -29,6 +31,8 @@ export default function Input(props: any) {
             secureTextEntry={secure}
             placeholderTextColor="#fff"
             style={[styles.inputField, endingIcon ? styles.inputEndingSpace : {}]}
+            // value={value}
+            onChangeText={(value) => setValue(value)}
         />
         {!endingIcon ? null :
             <TouchableWithoutFeedback onPress={endingAction}>
@@ -56,7 +60,7 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 15,
         borderBottomLeftRadius: 15,
         borderBottomRightRadius: 15,
-        backgroundColor: 'rgba(225, 225, 225, 0.5)'
+        backgroundColor: 'rgba(53, 52, 74, 0.8)'
     },
     inputIcon: {
         width: 15,
@@ -72,6 +76,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 13,
         width: '90%',
+
     },
     inputEndingSpace: {
         width: '80%',
