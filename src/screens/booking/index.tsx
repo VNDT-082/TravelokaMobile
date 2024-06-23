@@ -1,4 +1,4 @@
-import { RouteProp, useRoute } from "@react-navigation/native";
+import { RouteProp, useNavigation, useRoute } from "@react-navigation/native";
 import { ActivityIndicator, Image, ScrollView, TextInput, TouchableOpacity, View, useAnimatedValue } from "react-native";
 import { ScreenProps } from "react-native-screens";
 import GenerateId from "../../service/generateId";
@@ -17,13 +17,16 @@ import FormatDateDDD from "../../service/FormatDateDDD";
 import { Clock, Danger, InfoCircle, Information, NotificationStatus, SearchNormal1 } from "iconsax-react-native";
 import PolicyChangeAndCancelOrderModal from "../../components/PolicyChangeAndCancelOrderModal";
 import { getOnePosterByGiftCode } from "../../service/poster.service";
-import IconBooking from "../../components/iconfromsvg/IconBooking";
+import PayModal from "../../components/PayModal";
+import NotifyModal from "../../components/NotifyModal";
 
 
 type ScreenBookingHotelProp = RouteProp<RootStackParamList, 'BookingHotel'>;
 const BookingHotelSrceen: React.FC<ScreenProps> = () => {
     const route = useRoute<ScreenBookingHotelProp>();
     const { idRoom } = route.params;
+    const navigation = useNavigation();
+    const [payModalState, setPayModalState] = useState<boolean>(false);
     const [errorModalState, setErrorModalState] = useState<boolean>(false);
     const [errorDes, setErrorDes] = useState<string>('')
     const [typeNotify, setTypeNotify] = useState<'Error' | 'Sucsess' | 'Warning'>('Sucsess');
@@ -40,6 +43,10 @@ const BookingHotelSrceen: React.FC<ScreenProps> = () => {
     const [discountMessage, setDiscountMessage] = useState<string>('');
     const [discountModel, setDiscountModel] = useState<IPoster>();
     const [discountPrice, setDiscountPrice] = useState<number>(0);
+    const [notifyModalState, setNotifyModalState] = useState<boolean>(false);
+    const [notifyValue, setNotifyValue] = useState<string>('');
+    const [bookingResult, setBookingResult] = useState<IBooking>();
+
 
     const [totalDay, setTotalDay] = useState<number>(0);
     const [totalPrice, setTotalPrice] = useState<number>(0);
@@ -299,195 +306,239 @@ const BookingHotelSrceen: React.FC<ScreenProps> = () => {
 
 
                     </View>
+                    {/* thanh toan */}
+                    {bookingResult == undefined ?
+                        <View style={{ backgroundColor: AppColor.Gray01, padding: 10 }}>
+                            <View style={{
+                                padding: 15, backgroundColor: AppColor.white,
+                                borderStyle: 'solid', borderRadius: 10,
+                                shadowColor: '#000',
+                                shadowOffset: {
+                                    width: 1,
+                                    height: 2,
+                                },
+                                shadowOpacity: 0.23,
+                                shadowRadius: 2.62,
+                                elevation: 4, marginVertical: 10,
+                            }}>
+                                <Text style={{ fontSize: 16, color: AppColor.Gray31 }}>Nhập mã code giảm giá</Text>
+                                <View style={{ flexDirection: 'row', flex: 5, padding: 10 }}>
+                                    <TextInput
+                                        style={{
+                                            fontSize: 15, paddingLeft: 5,
+                                            flex: 4, borderColor: AppColor.BlueDark, borderTopLeftRadius: 5,
+                                            borderBottomLeftRadius: 5, borderWidth: 1, backgroundColor: AppColor.white
+                                        }}
+                                        placeholder="Mã giảm giá của bạn"
+                                        onChangeText={(value: string) => {
+                                            setDisountCode(value)
+                                            if (value.length == 0) {
+                                                setDiscountMessage('')
+                                                setDiscountCanUse(false)
+                                                setDiscountValue(0)
+                                                setTotalPrice(totalPriceActual)
+                                            }
+                                        }}
+                                        value={discountCode}
+                                    /><TouchableOpacity style={{
+                                        width: 50, height: 50, backgroundColor: AppColor.Blue1,
+                                        justifyContent: 'center', alignItems: 'center', borderBottomRightRadius: 5,
+                                        borderTopRightRadius: 5, borderColor: AppColor.BlueDark, borderWidth: 1
+                                    }} onPress={() => {
+                                        setDiscountMessage('Đang kiểm tra...')
+                                        const response = getOnePosterByGiftCode(discountCode);
+                                        response.then((data) => {
+                                            setDiscountModel(data);
+                                            if (data != undefined) {
+                                                handleGetDiscountValue(data);
+                                            }
+                                            else {
+                                                setDiscountMessage('Mã giảm giá không tồn tại, vui lòng thử lại.')
+                                            }
+                                            console.log('iposter', data);
+                                        }).catch((err) => { console.log('errr', err) })
+                                    }}>
+                                        <SearchNormal1 size="32" color="#d9e3f0" variant="Outline" />
+                                    </TouchableOpacity>
+                                </View>
+                                <Text style={{ fontSize: 16, color: AppColor.Red }}>{discountMessage}</Text>
+                            </View>
 
-                    <View style={{ backgroundColor: AppColor.Gray01, padding: 10 }}>
-                        <View style={{
-                            padding: 15, backgroundColor: AppColor.white,
-                            borderStyle: 'solid', borderRadius: 10,
-                            shadowColor: '#000',
-                            shadowOffset: {
-                                width: 1,
-                                height: 2,
-                            },
-                            shadowOpacity: 0.23,
-                            shadowRadius: 2.62,
-                            elevation: 4, marginVertical: 10,
-                        }}>
-                            <Text style={{ fontSize: 16, color: AppColor.Gray31 }}>Nhập mã code giảm giá</Text>
-                            <View style={{ flexDirection: 'row', flex: 5, padding: 10 }}>
-                                <TextInput
-                                    style={{
-                                        fontSize: 15, paddingLeft: 5,
-                                        flex: 4, borderColor: AppColor.BlueDark, borderTopLeftRadius: 5,
-                                        borderBottomLeftRadius: 5, borderWidth: 1, backgroundColor: AppColor.white
-                                    }}
-                                    placeholder="Mã giảm giá của bạn"
-                                    onChangeText={(value: string) => {
-                                        setDisountCode(value)
-                                        if (value.length == 0) {
-                                            setDiscountMessage('')
-                                            setDiscountCanUse(false)
-                                            setDiscountValue(0)
-                                            setTotalPrice(totalPriceActual)
-                                        }
-                                    }}
-                                    value={discountCode}
-                                /><TouchableOpacity style={{
-                                    width: 50, height: 50, backgroundColor: AppColor.Blue1,
-                                    justifyContent: 'center', alignItems: 'center', borderBottomRightRadius: 5,
-                                    borderTopRightRadius: 5, borderColor: AppColor.BlueDark, borderWidth: 1
-                                }} onPress={() => {
-                                    setDiscountMessage('Đang kiểm tra...')
-                                    const response = getOnePosterByGiftCode(discountCode);
-                                    response.then((data) => {
-                                        setDiscountModel(data);
-                                        if (data != undefined) {
-                                            handleGetDiscountValue(data);
-                                        }
-                                        else {
-                                            setDiscountMessage('Mã giảm giá không tồn tại, vui lòng thử lại.')
-                                        }
-                                        console.log('iposter', data);
-                                    }).catch((err) => { console.log('errr', err) })
+                            <View style={{
+                                padding: 15, backgroundColor: AppColor.white,
+                                borderStyle: 'solid', borderRadius: 10,
+                                shadowColor: '#000',
+                                shadowOffset: {
+                                    width: 1,
+                                    height: 2,
+                                },
+                                shadowOpacity: 0.23,
+                                shadowRadius: 2.62,
+                                elevation: 4, marginVertical: 10,
+                            }}>
+                                <View style={{ flexDirection: 'row', padding: 10 }}>
+                                    <Information size="32" color="#ff8a65" variant="Bulk" />
+
+                                    <Text style={{ fontSize: 16, color: AppColor.Gray31, paddingHorizontal: 10 }}> Thuế và phí là các
+                                        khoản được chúng tôi chuyển trả cho khách sạn. Mọi thắc mắc về thuế và hóa
+                                        đơn, vui lòng tham khảo Điều khoản và Điều kiện của chúng tôi để được giải đáp</Text>
+                                </View>
+                                <Text style={{ fontWeight: 'bold', color: AppColor.Blue1, fontSize: 18 }}>Giá phòng</Text>
+                                <View >
+                                    <View>
+                                        <Text style={{ fontSize: 16, }}>
+                                            <Text>
+                                                (x{TotalRoom} Phòng)
+                                            </Text>
+                                            <Text >
+                                                {room?.typeroom?.Name}, (x{totalDay}Đêm)
+                                            </Text>
+                                        </Text>
+                                    </View>
+                                    <View >
+                                        <Text style={{ fontSize: 16, color: AppColor.Red }}>
+                                            <Text>
+                                                {room?.typeroom?.Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                                (x{totalDay})
+                                                = {((room?.typeroom?.Price ?? 0) * totalDay * Number.parseInt(TotalRoom ? TotalRoom.toString() : '1')).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                            </Text>
+                                        </Text>
+                                    </View>
+                                </View>
+
+                                {/* thue vat */}
+                                {room?.Bao_Gom_Thue_Va_Phi ? <Text style={{ fontSize: 15 }}>
+                                    Đã bao gồm thuế VAT(8%)
+                                </Text> :
+                                    <View style={{
+                                        flexDirection: 'row', borderTopColor: AppColor.Gray01, gap: 5, marginVertical: 10
+                                        , borderTopWidth: 0.5,
+                                    }}>
+                                        <View>
+                                            <Text style={{ fontSize: 15 }}>Giá chưa bao gồm VAT, bạn phải trả thêm:</Text>
+                                            <Text style={{ fontSize: 12 }}>VAT = 8% giá trị phiếu đặt</Text>
+                                        </View>
+                                        <Text style={{ fontSize: 16, color: AppColor.Red }}>
+                                            {(totalPrice * 8 / 100).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                        </Text>
+                                    </View>}
+
+                                {/* gia phong co khuyen mai */}
+                                {room?.Discount && room?.Discount > 0 ?
+                                    <><View style={{
+                                        flex: 2,
+                                        flexDirection: 'row', borderTopColor: AppColor.Gray01, gap: 5, marginVertical: 10
+                                        , borderTopWidth: 0.5,
+                                    }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text style={{ fontSize: 15 }}>Giá phòng sau giảm giá</Text>
+                                            <Text >
+                                                Phòng được giảm: {room.Discount}%
+                                            </Text>
+                                        </View>
+                                        <Text style={{ fontSize: 16, color: AppColor.Red, textAlign: 'right' }}>
+                                            chỉ còn  {(totalPrice).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                        </Text>
+                                    </View></>
+                                    : null}
+
+                                {/* Gift code neu co */}
+                                {discountCanUse == true ?
+                                    <><View style={{
+                                        flex: 2,
+                                        flexDirection: 'row', borderTopColor: AppColor.Gray01, gap: 5, marginVertical: 10
+                                        , borderTopWidth: 0.5,
+                                    }}>
+                                        <View style={{ flex: 1 }}>
+                                            <Text>Giảm giá từ GIFT-CODE</Text>
+                                            <Text >
+                                                Được tính vào tổng giá trị hóa đơn
+                                            </Text>
+                                        </View>
+                                        <Text style={{ fontSize: 16, color: AppColor.Red, textAlign: 'right' }}>
+                                            giảm {discountState ? discountValue + '%' :
+                                                discountValue.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                        </Text>
+                                    </View>
+                                    </>
+                                    : null}
+
+                                {/* gia phong phai tra */}
+                                <View style={{
+                                    flex: 2,
+                                    flexDirection: 'row', borderTopColor: AppColor.Gray01, gap: 5, marginVertical: 10
+                                    , borderTopWidth: 0.5,
                                 }}>
-                                    <SearchNormal1 size="32" color="#d9e3f0" variant="Outline" />
+                                    <Text style={{ flex: 1, fontSize: 18, color: AppColor.Red, }}>Giá phòng phải thanh toán:</Text>
+                                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: AppColor.Red, textAlign: 'right' }}>
+                                        {room?.Bao_Gom_Thue_Va_Phi ?
+                                            totalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
+                                            : (totalPrice + (totalPrice * 8 / 100)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
+                                    </Text>
+                                </View>
+                                <View style={{ flexDirection: 'row' }}>
+                                    <Clock size="32" color="#2ccce4" variant="Outline" />
+                                    <Text style={{ fontSize: 18, color: AppColor.Blue1 }}>Hãy giữ phòng này ngay trước khi nó tăng cao hơn!</Text>
+                                </View>
+
+                                <TouchableOpacity
+                                    onPress={() => { setPayModalState(true) }}>
+                                    <Text style={{
+                                        color: AppColor.white, backgroundColor: AppColor.Orage,
+                                        textAlign: 'center', paddingVertical: 10, borderRadius: 5, fontWeight: 'black', fontSize: 16
+                                    }}>Tiếp tục thanh toán</Text>
                                 </TouchableOpacity>
                             </View>
-                            <Text style={{ fontSize: 16, color: AppColor.Red }}>{discountMessage}</Text>
-                        </View>
+                        </View> :
 
-                        <View style={{
-                            padding: 15, backgroundColor: AppColor.white,
-                            borderStyle: 'solid', borderRadius: 10,
-                            shadowColor: '#000',
-                            shadowOffset: {
-                                width: 1,
-                                height: 2,
-                            },
-                            shadowOpacity: 0.23,
-                            shadowRadius: 2.62,
-                            elevation: 4, marginVertical: 10,
-                        }}>
-                            <View style={{ flexDirection: 'row', padding: 10 }}>
-                                <Information size="32" color="#ff8a65" variant="Bulk" />
-
-                                <Text style={{ fontSize: 16, color: AppColor.Gray31, paddingHorizontal: 10 }}> Thuế và phí là các
-                                    khoản được chúng tôi chuyển trả cho khách sạn. Mọi thắc mắc về thuế và hóa
-                                    đơn, vui lòng tham khảo Điều khoản và Điều kiện của chúng tôi để được giải đáp</Text>
-                            </View>
-                            <Text style={{ fontWeight: 'bold', color: AppColor.Blue1, fontSize: 18 }}>Giá phòng</Text>
-                            <View >
-                                <View>
-                                    <Text style={{ fontSize: 16, }}>
-                                        <Text>
-                                            (x{TotalRoom} Phòng)
-                                        </Text>
-                                        <Text >
-                                            {room?.typeroom?.Name}, (x{totalDay}Đêm)
-                                        </Text>
-                                    </Text>
-                                </View>
-                                <View >
-                                    <Text style={{ fontSize: 16, color: AppColor.Red }}>
-                                        <Text>
-                                            {room?.typeroom?.Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                            (x{totalDay})
-                                            = {((room?.typeroom?.Price ?? 0) * totalDay * Number.parseInt(TotalRoom ? TotalRoom.toString() : '1')).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                        </Text>
-                                    </Text>
-                                </View>
-                            </View>
-
-                            {/* thue vat */}
-                            {room?.Bao_Gom_Thue_Va_Phi ? <Text style={{ fontSize: 15 }}>
-                                Đã bao gồm thuế VAT(8%)
-                            </Text> :
-                                <View style={{
-                                    flexDirection: 'row', borderTopColor: AppColor.Gray01, gap: 5, marginVertical: 10
-                                    , borderTopWidth: 0.5,
-                                }}>
-                                    <View>
-                                        <Text style={{ fontSize: 15 }}>Giá chưa bao gồm VAT, bạn phải trả thêm:</Text>
-                                        <Text style={{ fontSize: 12 }}>VAT = 8% giá trị phiếu đặt</Text>
-                                    </View>
-                                    <Text style={{ fontSize: 16, color: AppColor.Red }}>
-                                        {(totalPrice * 8 / 100).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                    </Text>
-                                </View>}
-
-                            {/* gia phong co khuyen mai */}
-                            {room?.Discount && room?.Discount > 0 ?
-                                <><View style={{
-                                    flex: 2,
-                                    flexDirection: 'row', borderTopColor: AppColor.Gray01, gap: 5, marginVertical: 10
-                                    , borderTopWidth: 0.5,
-                                }}>
-                                    <View style={{ flex: 1 }}>
-                                        <Text style={{ fontSize: 15 }}>Giá phòng sau giảm giá</Text>
-                                        <Text >
-                                            Phòng được giảm: {room.Discount}%
-                                        </Text>
-                                    </View>
-                                    <Text style={{ fontSize: 16, color: AppColor.Red, textAlign: 'right' }}>
-                                        chỉ còn  {(totalPrice).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                    </Text>
-                                </View></>
-                                : null}
-
-                            {/* Gift code neu co */}
-                            {discountCanUse == true ?
-                                <><View style={{
-                                    flex: 2,
-                                    flexDirection: 'row', borderTopColor: AppColor.Gray01, gap: 5, marginVertical: 10
-                                    , borderTopWidth: 0.5,
-                                }}>
-                                    <View style={{ flex: 1 }}>
-                                        <Text>Giảm giá từ GIFT-CODE</Text>
-                                        <Text >
-                                            Được tính vào tổng giá trị hóa đơn
-                                        </Text>
-                                    </View>
-                                    <Text style={{ fontSize: 16, color: AppColor.Red, textAlign: 'right' }}>
-                                        giảm {discountState ? discountValue + '%' :
-                                            discountValue.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                    </Text>
-                                </View>
-                                </>
-                                : null}
-
-                            {/* gia phong phai tra */}
+                        //* ket qua */}
+                        <View style={{ backgroundColor: AppColor.Gray01, zIndex: 50, padding: 10 }}>
                             <View style={{
-                                flex: 2,
-                                flexDirection: 'row', borderTopColor: AppColor.Gray01, gap: 5, marginVertical: 10
-                                , borderTopWidth: 0.5,
+                                padding: 15, backgroundColor: AppColor.white,
+                                borderStyle: 'solid', borderRadius: 10,
+                                shadowColor: '#000',
+                                shadowOffset: {
+                                    width: 1,
+                                    height: 2,
+                                },
+                                shadowOpacity: 0.23,
+                                shadowRadius: 2.62,
+                                elevation: 4, marginVertical: 10,
                             }}>
-                                <Text style={{ flex: 1, fontSize: 18, color: AppColor.Red, }}>Giá phòng phải thanh toán:</Text>
-                                <Text style={{ fontSize: 18, fontWeight: 'bold', color: AppColor.Red, textAlign: 'right' }}>
-                                    {room?.Bao_Gom_Thue_Va_Phi ?
-                                        totalPrice.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
-                                        : (totalPrice + (totalPrice * 8 / 100)).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
-                                </Text>
+                                <Text>Kết quả đặt phòng: {notifyValue}</Text>
+                                <Text>Mã phiếu đặt: {bookingResult?.id}</Text>
+                                <Text>Ngày nhận phòng: {bookingResult?.TimeRecive != undefined ? FormatDateDDD(bookingResult?.TimeRecive) : null}</Text>
+                                <Text>Ngày trả phòng: {bookingResult?.TimeLeave != undefined ? FormatDateDDD(bookingResult?.TimeLeave) : null}</Text>
+                                <Text>Chi phí: {bookingResult?.Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
+                                <Text>Giảm giá: {bookingResult?.Discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
+                                <Text>Hình thức thanh toán: {bookingResult?.TypePay}</Text>
+                                <TouchableOpacity
+                                    onPress={() => { navigation.navigate('Trang chủ') }}>
+                                    <Text style={{
+                                        fontSize: 16, fontWeight: 'bold',
+                                        color: AppColor.white, backgroundColor: AppColor.Blue1, borderRadius: 5,
+                                        textAlign: 'center', paddingVertical: 5
+                                    }}>Quay lại trang chủ</Text>
+                                </TouchableOpacity>
                             </View>
-                            <View style={{ flexDirection: 'row' }}>
-                                <Clock size="32" color="#2ccce4" variant="Outline" />
-                                <Text style={{ fontSize: 18, color: AppColor.Blue1 }}>Hãy giữ phòng này ngay trước khi nó tăng cao hơn!</Text>
-                            </View>
+                        </View>}
 
-                            <TouchableOpacity>
-                                <Text style={{
-                                    color: AppColor.white, backgroundColor: AppColor.Orage,
-                                    textAlign: 'center', paddingVertical: 10, borderRadius: 5, fontWeight: 'black', fontSize: 16
-                                }}>Tiếp tục thanh toán</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
                 </ScrollView>
 
                 <View>
+                    <PayModal discountCanUse={discountCanUse} discountState={discountState}
+                        discountValue={discountValue} payModalState={payModalState}
+                        setPayModalState={setPayModalState} room={room} totalPrice={totalPrice}
+                        TotalRoom={TotalRoom} totalDay={totalDay} discountCode={discountCode}
+                        discountPrice={discountPrice} setBookingResult={setBookingResult}
+                        setNotifyValue={setNotifyValue} userGuest={userGuest}
+                        setNotifyModalState={setNotifyModalState} />
                     <ErrorModal errorDes={errorDes} errorModalState={errorModalState}
                         setErrorModalState={setErrorModalState} typeNotify={typeNotify} />
                     <PolicyChangeAndCancelOrderModal policyChangeAndCancelOrderModalState={policyChangeAndCancelOrderModalState}
                         setPolicyChangeAndCancelOrderModalState={setPolicyChangeAndCancelOrderModalState} timeRecive={timeReciveSelected} />
+                    <NotifyModal notifyModalState={notifyModalState}
+                        notifyValue={notifyValue} setNotifyModalState={setNotifyModalState} />
                 </View>
             </View>
     );

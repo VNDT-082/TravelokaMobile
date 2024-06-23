@@ -4,7 +4,7 @@ import BookingHotel_Model from "../types/booking.class";
 
 export const createBookingHotel = async (body: BookingHotel_Model): Promise<any> => {
     try {
-        const response = await http.post<string>(`/booking-hotel/add-new-booking`,
+        const response = await http.post<string>(`booking-hotel/add-new-booking`,
             body,
             {
                 headers: {
@@ -30,7 +30,7 @@ export const createBookingHotel = async (body: BookingHotel_Model): Promise<any>
 
 export const getListBookingByGusetId = async (guestId: string): Promise<any> => {
     try {
-        const response = await http.get<string>(`/booking-hotel/get-list-booking-by-guest-id?id=${guestId}`
+        const response = await http.get<string>(`booking-hotel/get-list-booking-by-guest-id?id=${guestId}`
         );
         if (response.status === 200) {
             return response.data;

@@ -5,10 +5,17 @@ import { useNavigation } from '@react-navigation/native';
 import getLocalStorageItem from '../../service/getLocalStorageItem';
 import LocalStoreEnum from '../../axios/LocalStoreEnum';
 import URL_Enum from '../../axios/URL_Enum';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import UpdateProfileModal from '../../components/UpdateProfileModal';
+import NotifyModal from '../../components/NotifyModal';
 
 const Profile = () => {
     const navigation = useNavigation();
+    const [notifyModalState, setNotifyModalState] = useState<boolean>(false);
+    const [notifyValue, setNotifyValue] = useState<string>('');
+    const [updateProfileModalState, setUpdateProfileModalState] = useState<boolean>(false);
     const [userGuest, setUserGuest] = useState<IGuest>();
+    const [action, setAction] = useState<'changeInfor' | 'changePass' | 'changeContact'>('changeContact');
     const getIGuest = () => {
         const IGusetStorage = getLocalStorageItem(LocalStoreEnum.IGUEST)
         console.log('IGusetStorage', IGusetStorage)
@@ -100,7 +107,11 @@ const Profile = () => {
                             marginVertical: 5, alignItems: 'flex-end', justifyContent: 'flex-end',
                             borderTopWidth: 0.5
                         }}>
-                            <TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setAction('changeInfor');
+                                    setUpdateProfileModalState(true)
+                                }}>
                                 <Text style={{
                                     color: AppColor.white,
                                     backgroundColor: AppColor.Blue1, paddingHorizontal: 20, paddingVertical: 10
@@ -156,6 +167,23 @@ const Profile = () => {
                                 }}>Đổi email liên hệ</Text>
                             </TouchableOpacity>
                         </View>
+
+                        <View style={{
+                            flexDirection: 'row', padding: 10, borderTopColor: AppColor.white,
+                            marginVertical: 5, alignItems: 'flex-end', justifyContent: 'flex-end',
+                            borderTopWidth: 0.5
+                        }}>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setAction('changePass');
+                                    setUpdateProfileModalState(true);
+                                }}>
+                                <Text style={{
+                                    color: AppColor.white,
+                                    backgroundColor: AppColor.Blue1, paddingHorizontal: 30, paddingVertical: 10
+                                }}>Đổi mật khẩu</Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
 
                     <View style={{ backgroundColor: AppColor.Gray01, marginVertical: 10 }}>
@@ -175,12 +203,21 @@ const Profile = () => {
                         </View>
                     </View>
 
+                    <UpdateProfileModal setUpdateProfileModalState={setUpdateProfileModalState}
+                        updateProfileModalState={updateProfileModalState} userGuest={userGuest}
+                        setNotifyModalState={setNotifyModalState} setNotifyValue={setNotifyValue}
+                        setUserGuest={setUserGuest} action={action} />
+                    <NotifyModal notifyModalState={notifyModalState}
+                        notifyValue={notifyValue} setNotifyModalState={setNotifyModalState} />
                 </ScrollView>
             </View> :
                 <View>
                     <View style={{ marginTop: 50 }}>
                         {/* <Text>aaaa</Text> */}
-                        <TouchableOpacity onPress={() => { navigation.navigate('Login') }}>
+                        <TouchableOpacity onPress={async () => {
+                            await AsyncStorage.removeItem(LocalStoreEnum.IGUEST);
+                            navigation.navigate('Login');
+                        }}>
                             <Text style={{ color: AppColor.TextLight }}>Đăng nhập</Text>
                         </TouchableOpacity>
                     </View></View>}

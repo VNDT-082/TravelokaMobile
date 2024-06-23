@@ -7,6 +7,7 @@ import getLocalStorageItem from '../../service/getLocalStorageItem';
 import LocalStoreEnum from '../../axios/LocalStoreEnum';
 import { getListBookingByGusetId } from '../../service/bookinghotel.service';
 import FormatDateDDD from '../../service/FormatDateDDD';
+import { ActivityIndicator } from 'react-native-paper';
 
 
 const getMonthLatter = (monthLatte: number) => {
@@ -69,8 +70,6 @@ const CartScreen = () => {
 
 
 
-
-
     const [sortDate, setSortDate] = useState<string>(SortEnum.MoiNhat);
     const [listBookingHotel, setListBookingHotel] = useState<IBooking[]>([]);
 
@@ -78,13 +77,14 @@ const CartScreen = () => {
         getIGuest();
     }, [])
 
-    const getData = () => {
+    const getData = async () => {
         if (userGuest?.id != undefined) {
             setLoadingBookingState(true);
-            const reponseHistory = getListBookingByGusetId(userGuest?.id)
+            const reponseHistory = await getListBookingByGusetId(userGuest?.id)
                 .then(response => {
+                    console.log('reponseHistory', response.result)
                     setListBookingHotel(response.result)
-                    console.log('reponseHistory', response)
+
                 }).catch((err) => {
                     setModalErrValue('Lỗi truy cập vui lòng thử lại')
                     setModalErr(true)
@@ -112,75 +112,79 @@ const CartScreen = () => {
 
 
     return (
-        <View style={{
-            backgroundColor: AppColor.Snow1, height: '100%'
-        }}>
-            <HeaderMenuTitlePage title='Phiếu đặt phòng' />
-            <View style={{ marginTop: 50 }}>
-                <ScrollView horizontal style={{ padding: 10 }}>
-                    <Text style={styles.textShort}
-                        onPress={() => setSortDate(SortEnum.MoiNhat)}>{SortEnum.MoiNhat}</Text>
+        loadingBookingState ? <View style={{
+            width: '100%', height: '100%', flex: 1, justifyContent: 'center',
+            alignItems: 'center', display: 'flex'
+        }}><ActivityIndicator /></View> :
+            <View style={{
+                backgroundColor: AppColor.Snow1, height: '100%'
+            }}>
+                <HeaderMenuTitlePage title='Phiếu đặt phòng' />
+                <View style={{ marginTop: 50 }}>
+                    <ScrollView horizontal style={{ padding: 10 }}>
+                        <Text style={styles.textShort}
+                            onPress={() => setSortDate(SortEnum.MoiNhat)}>{SortEnum.MoiNhat}</Text>
 
-                    <Text style={styles.textShort}
-                        onPress={() => setSortDate(SortEnum.CuNhat)}>{SortEnum.CuNhat}</Text>
+                        <Text style={styles.textShort}
+                            onPress={() => setSortDate(SortEnum.CuNhat)}>{SortEnum.CuNhat}</Text>
 
-                    <Text style={styles.textShort}
-                        onPress={() => setSortDate(SortEnum.ChinMuoiNgayQua)}>{SortEnum.ChinMuoiNgayQua}</Text>
+                        <Text style={styles.textShort}
+                            onPress={() => setSortDate(SortEnum.ChinMuoiNgayQua)}>{SortEnum.ChinMuoiNgayQua}</Text>
 
-                    <Text style={styles.textShort}
-                        onPress={() => setSortDate(SortEnum.MotThangTruoc)}>{getMonthLatter(1)}</Text>
+                        <Text style={styles.textShort}
+                            onPress={() => setSortDate(SortEnum.MotThangTruoc)}>{getMonthLatter(1)}</Text>
 
-                    <Text style={styles.textShort}
-                        onPress={() => setSortDate(SortEnum.HaiThangTruoc)}>{getMonthLatter(2)}</Text>
+                        <Text style={styles.textShort}
+                            onPress={() => setSortDate(SortEnum.HaiThangTruoc)}>{getMonthLatter(2)}</Text>
 
-                    <Text style={styles.textShort}
-                        onPress={() => setSortDate(SortEnum.BaThangTruoc)}>{getMonthLatter(3)}</Text>
+                        <Text style={styles.textShort}
+                            onPress={() => setSortDate(SortEnum.BaThangTruoc)}>{getMonthLatter(3)}</Text>
 
-                    <Text style={styles.textShort}
-                        onPress={() => setSortDate(SortEnum.Clear)}>{SortEnum.Clear}</Text>
-                </ScrollView>
-                <ScrollView style={{ padding: 10 }}>
-                    {listBookingHotel ?
-                        listBookingHotel.map((item, index) => (
+                        <Text style={styles.textShort}
+                            onPress={() => setSortDate(SortEnum.Clear)}>{SortEnum.Clear}</Text>
+                    </ScrollView>
+                    <ScrollView style={{ padding: 10 }}>
+                        {listBookingHotel ?
+                            listBookingHotel.map((item, index) => (
 
-                            <View key={index}
-                                style={{
-                                    backgroundColor: AppColor.CyanLight,
-                                    marginVertical: 10,
-                                    padding: 10,
-                                    borderStyle: 'solid', borderRadius: 10,
-                                    shadowColor: '#000',
-                                    shadowOffset: {
-                                        width: 1,
-                                        height: 2,
-                                    },
-                                    shadowOpacity: 0.23,
-                                    shadowRadius: 2.62,
-                                    elevation: 4,
-                                    borderColor: AppColor.Blue1,
-                                    borderWidth: 1
-                                }}>
-                                <Text style={{ fontSize: 15, color: AppColor.Gray31, marginVertical: 5 }}>Mã phòng: {item?.RoomId}(Tên phòng: {item.room?.RoomName}) - Loại phòng: {item.room?.typeroom?.Name} - Khách sạn: {item.room?.typeroom?.hotel?.Name}</Text>
-                                <Text style={{ fontSize: 15, color: AppColor.Gray31, marginVertical: 5 }}>Mã phiếu đặt: {item?.id} </Text>
-                                <Text style={{ fontSize: 15, color: AppColor.Gray31, marginVertical: 5 }}>Ngày nhận phòng: {item?.TimeRecive != undefined ? FormatDateDDD(item?.TimeRecive) : null} - Ngày trả phòng: {item?.TimeLeave != undefined ? FormatDateDDD(item?.TimeLeave) : null}</Text>
-                                <Text style={{ fontSize: 15, color: AppColor.Red, marginVertical: 5 }}>Chi phí: <Text>{item?.Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text> (Giảm giá: {item?.Discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} )</Text>
-                                <Text style={{ fontSize: 15, color: AppColor.Blue1, marginVertical: 5 }}>Hình thức thanh toán:{item?.TypePay}</Text>
-                                <TouchableOpacity><Text
+                                <View key={index}
                                     style={{
-                                        textAlign: 'center', paddingVertical: 10,
-                                        fontSize: 17, color: AppColor.white, marginVertical: 5,
-                                        backgroundColor: AppColor.Blue1, fontWeight: 'bold', borderRadius: 5
-                                    }}>Xem chi tiết phòng</Text>
-                                </TouchableOpacity>
-                            </View>
-                        ))
+                                        backgroundColor: AppColor.CyanLight,
+                                        marginVertical: 10,
+                                        padding: 10,
+                                        borderStyle: 'solid', borderRadius: 10,
+                                        shadowColor: '#000',
+                                        shadowOffset: {
+                                            width: 1,
+                                            height: 2,
+                                        },
+                                        shadowOpacity: 0.23,
+                                        shadowRadius: 2.62,
+                                        elevation: 4,
+                                        borderColor: AppColor.Blue1,
+                                        borderWidth: 1
+                                    }}>
+                                    <Text style={{ fontSize: 15, color: AppColor.Gray31, marginVertical: 5 }}>Mã phòng: {item?.RoomId}(Tên phòng: {item.room?.RoomName}) - Loại phòng: {item.room?.typeroom?.Name} - Khách sạn: {item.room?.typeroom?.hotel?.Name}</Text>
+                                    <Text style={{ fontSize: 15, color: AppColor.Gray31, marginVertical: 5 }}>Mã phiếu đặt: {item?.id} </Text>
+                                    <Text style={{ fontSize: 15, color: AppColor.Gray31, marginVertical: 5 }}>Ngày nhận phòng: {item?.TimeRecive != undefined ? FormatDateDDD(item?.TimeRecive) : null} - Ngày trả phòng: {item?.TimeLeave != undefined ? FormatDateDDD(item?.TimeLeave) : null}</Text>
+                                    <Text style={{ fontSize: 15, color: AppColor.Red, marginVertical: 5 }}>Chi phí: <Text>{item?.Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text> (Giảm giá: {item?.Discount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} )</Text>
+                                    <Text style={{ fontSize: 15, color: AppColor.Blue1, marginVertical: 5 }}>Hình thức thanh toán:{item?.TypePay}</Text>
+                                    <TouchableOpacity><Text
+                                        style={{
+                                            textAlign: 'center', paddingVertical: 10,
+                                            fontSize: 17, color: AppColor.white, marginVertical: 5,
+                                            backgroundColor: AppColor.Blue1, fontWeight: 'bold', borderRadius: 5
+                                        }}>Xem chi tiết phòng</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            ))
 
 
-                        : <View></View>}
-                    <View style={{ height: 90, paddingBottom: 90 }}></View>
-                </ScrollView>
+                            : <View></View>}
+                        <View style={{ height: 90, paddingBottom: 90 }}></View>
+                    </ScrollView>
+                </View>
             </View>
-        </View>
     )
 }
 

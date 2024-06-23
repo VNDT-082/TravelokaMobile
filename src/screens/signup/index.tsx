@@ -10,10 +10,10 @@ import {
 
 // import * as RootNavigation from '../navigation/RootNavigation';
 import Input from '../../components/login/Input';
-import Button from '../../components/login/Button';
-import * as ProfileNavigator from '../../navigators/ProfileNavigator';
-import { AppColor } from '../../assets/AppColor';
 import { Dimensions } from 'react-native';
+import { register } from '../../service/auth.service';
+import NotifyModal from '../../components/NotifyModal';
+import { useNavigation } from '@react-navigation/native';
 
 
 export default function Signup() {
@@ -22,6 +22,37 @@ export default function Signup() {
     const [pass, setPass] = useState<string>('');
     const [fullName, setFullName] = useState<string>('');
     const [passwordSecure, setPasswordSecure] = useState(true);
+    const [notifyModalState, setNotifyModalState] = useState<boolean>(false);
+    const [notifyValue, setNotifyValue] = useState<string>('');
+
+    const navigation = useNavigation();
+
+    const handleRegister = async () => {
+        const formData: IRegister = {
+            email: email,
+            name: fullName,
+            password: pass,
+            Type: 'Guest',
+            Telephone: phone,
+        };
+        const responseRegister = await register(formData).then(response => {
+            if (response?.success == true) {
+                setNotifyValue(response?.message);
+                setNotifyModalState(true);
+                setTimeout(() => {
+                    navigation.navigate('Login');
+                }, 2000)
+            }
+            else {
+                if (response?.message != undefined) {
+                    setNotifyValue(response.message);
+                    setNotifyModalState(true);
+                }
+
+            }
+
+        })
+    }
 
     return <View style={styles.container}>
         <Image
@@ -64,7 +95,7 @@ export default function Signup() {
                     leadingIcon={require("../../assets/login/key.png")}
                     endingIcon={require("../../assets/login/view.png")}
                 />
-                <TouchableOpacity onPress={() => { }}>
+                <TouchableOpacity onPress={() => { handleRegister() }}>
                     <Text style={{
                         width: Dimensions.get('window').width - 40,
                         alignItems: 'center',
@@ -93,6 +124,8 @@ export default function Signup() {
             {/* action={() => ProfileNavigator.navigate("main")}  */}
 
         </View>
+        <NotifyModal notifyModalState={notifyModalState}
+            notifyValue={notifyValue} setNotifyModalState={setNotifyModalState} />
     </View>;
 }
 

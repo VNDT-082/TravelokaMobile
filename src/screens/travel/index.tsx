@@ -56,8 +56,11 @@ const TravelScreen: React.FC<ScreenProps> = () => {
             valueProvinceid == null) {
             setIsLoading(true);
             getTop10New().then((response) => {
-                setListHotel(response)
-                setListHotelShort(response)
+                if (response != false) {
+                    setListHotel(response);
+                    setListHotelShort(response);
+                }
+                console.log('resonse', response);
             }).catch(err => { console.log(err) }).finally(() => {
                 setIsLoading(false);
             })
@@ -121,149 +124,151 @@ const TravelScreen: React.FC<ScreenProps> = () => {
 
                     {/* Khach san */}
                     <View style={{ padding: 10 }}>
-                        {listHotelShort != undefined && listHotelShort != null ? listHotelShort.map((item, index) => (
-                            <TouchableOpacity onPress={() => { handleClickHotel(item.id) }}>
-                                <View style={{
-                                    width: '100%', position: 'relative',
-                                    shadowColor: '#000',
-                                    shadowOffset: {
-                                        width: 1,
-                                        height: 2,
-                                    },
-                                    elevation: 4,
-                                    shadowOpacity: 0.23,
-                                    shadowRadius: 2.62,
-                                    borderRadius: 10,
-                                    backgroundColor: AppColor.Snow1,
-                                    padding: 10, marginVertical: 10,
-                                }}>
-                                    <View>
+                        {(listHotelShort != undefined && listHotelShort != null && listHotelShort.length > 0)
+                            ? listHotelShort.map((item, index) => (
+                                <TouchableOpacity onPress={() => { handleClickHotel(item.id) }}
+                                    key={item.id}>
+                                    <View style={{
+                                        width: '100%', position: 'relative',
+                                        shadowColor: '#000',
+                                        shadowOffset: {
+                                            width: 1,
+                                            height: 2,
+                                        },
+                                        elevation: 4,
+                                        shadowOpacity: 0.23,
+                                        shadowRadius: 2.62,
+                                        borderRadius: 10,
+                                        backgroundColor: AppColor.Snow1,
+                                        padding: 10, marginVertical: 10,
+                                    }}>
                                         <View>
-                                            <ScrollView horizontal>
-                                                {item.images.map(hitem => (
-                                                    <View style={{ width: 360, height: 220, borderTopLeftRadius: 5, borderTopRightRadius: 5, marginLeft: 10 }}>
-                                                        <Image style={{
-                                                            width: '100%', height: 220, borderTopLeftRadius: 5, borderTopRightRadius: 5
-                                                            , padding: 10
-                                                        }}
-                                                            source={{
-                                                                uri: URL_Enum.BaseURL_Image + hitem.FileName
-                                                            }}
-                                                            resizeMode="stretch"
-                                                            key={hitem.id} />
-                                                    </View>
-                                                ))}
-                                            </ScrollView>
-                                            {item.type_rooms != undefined ? GetMinDiscountByListTyperoom(item.type_rooms).maxDiscount > 0 ?
-                                                <Image style={{
-                                                    width: 50, height: 50, borderTopLeftRadius: 5, borderTopRightRadius: 5
-                                                    , padding: 10, position: 'absolute', left: 0, top: -5
-                                                }}
-                                                    source={require('../../assets/icon/bestprice.png')}
-                                                    resizeMode="stretch" /> : null : null}
-                                        </View>
-                                        <View style={{ flex: 7, flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start' }}>
-                                            <Text style={{ flex: 4, fontSize: 18, color: AppColor.Gray31, padding: 10 }}>{item.Name}</Text>
-                                            <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                                                <Image style={{
-                                                    width: 24, height: 24, borderTopLeftRadius: 5, borderTopRightRadius: 5
-                                                    , padding: 10
-                                                }}
-                                                    source={require('../../assets/icon/5285ed4483dbe0a200497d4c3de31128.webp')}
-                                                    resizeMode="stretch" />
-                                                {item.rates != undefined && item.rates != null ?
-                                                    <Text style={{ fontSize: 18, color: AppColor.Gray31, padding: 10 }}>{ToDoAVGFromArray(item.rates)}/10</Text>
-                                                    : null}
-                                            </View>
-                                        </View>
-                                        <View style={{ flexDirection: 'row', gap: 5 }}>
-                                            <View style={{
-                                                flexDirection: 'row', backgroundColor: AppColor.CyanLight, borderRadius: 12, padding: 5
-                                                , justifyContent: 'flex-start', alignItems: 'center',
-                                            }}>
-                                                <Image style={{
-                                                    width: 24, height: 24, borderTopLeftRadius: 5, borderTopRightRadius: 5
-                                                    , padding: 10
-                                                }}
-                                                    source={require('../../assets/icon/hotel_icon.webp')}
-                                                    resizeMode="stretch" />
-                                                <Text>{item.Type != 'Khác' ? item.Type : ''}</Text>
-                                            </View>
-                                            <Star size={18} star={item.StarRate} />
-                                        </View>
-
-                                        <View style={{
-                                            flexDirection: 'row', borderRadius: 12, padding: 10
-                                            , justifyContent: 'flex-start', alignItems: 'flex-start'
-                                        }}>
-                                            <Location size="18" color={AppColor.Gray31} />
-                                            <Text>{item.Address}</Text>
-                                        </View>
-                                        <View style={{
-                                            padding: 10, borderBottomColor: AppColor.Gray01,
-                                            borderBottomWidth: 1.5, borderStyle: 'dotted'
-                                        }}>
-                                            <ScrollView horizontal >
-                                                {item.convenients?.map(citem => (
-                                                    <View style={{
-                                                        borderRadius: 100, paddingVertical: 2, paddingHorizontal: 5,
-                                                        marginRight: 5
-                                                    }}><Text style={{
-                                                        backgroundColor: AppColor.Gray01, color: AppColor.Gray31,
-                                                        borderRadius: 100, paddingVertical: 2, paddingHorizontal: 5,
-                                                        marginRight: 5
-                                                    }}>{citem.Title}</Text></View>
-                                                ))}
-                                            </ScrollView>
-
-                                        </View>
-                                        {item.type_rooms != undefined ? checkHaveCancleOrChangeTimeRevice(item.type_rooms).nonePolicy ?
                                             <View>
-                                                {checkHaveCancleOrChangeTimeRevice(item.type_rooms).typePay == HinhThucThanhToan_Enum.ThanhToanTrucTiep ?
-                                                    <Text style={{ color: AppColor.Green31 }}>Có {HinhThucThanhToan_Enum.ThanhToanTrucTiep}</Text> : null}
-                                                {checkHaveCancleOrChangeTimeRevice(item.type_rooms).haveCancle ? <Text style={{ color: AppColor.Green31 }}>Có thể hủy phòng</Text> : null}
-                                                {checkHaveCancleOrChangeTimeRevice(item.type_rooms).haveChangeTimeRevice ? <Text style={{ color: AppColor.Green31 }}>Có thể đổi lịch</Text> : null}
-                                            </View> : null : null}
+                                                <ScrollView horizontal>
+                                                    {item.images.map((hitem, hindex) => (
+                                                        <View key={hitem.id} style={{ width: 360, height: 220, borderTopLeftRadius: 5, borderTopRightRadius: 5, marginLeft: 10 }}>
+                                                            <Image style={{
+                                                                width: '100%', height: 220, borderTopLeftRadius: 5, borderTopRightRadius: 5
+                                                                , padding: 10
+                                                            }}
+                                                                source={{
+                                                                    uri: URL_Enum.BaseURL_Image + hitem.FileName
+                                                                }}
+                                                                resizeMode="stretch"
+                                                                key={hitem.id} />
+                                                        </View>
+                                                    ))}
+                                                </ScrollView>
+                                                {item.type_rooms != undefined ? GetMinDiscountByListTyperoom(item.type_rooms).maxDiscount > 0 ?
+                                                    <Image style={{
+                                                        width: 50, height: 50, borderTopLeftRadius: 5, borderTopRightRadius: 5
+                                                        , padding: 10, position: 'absolute', left: 0, top: -5
+                                                    }}
+                                                        source={require('../../assets/icon/bestprice.png')}
+                                                        resizeMode="stretch" /> : null : null}
+                                            </View>
+                                            <View style={{ flex: 7, flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-start' }}>
+                                                <Text style={{ flex: 4, fontSize: 18, color: AppColor.Gray31, padding: 10 }}>{item.Name}</Text>
+                                                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+                                                    <Image style={{
+                                                        width: 24, height: 24, borderTopLeftRadius: 5, borderTopRightRadius: 5
+                                                        , padding: 10
+                                                    }}
+                                                        source={require('../../assets/icon/5285ed4483dbe0a200497d4c3de31128.webp')}
+                                                        resizeMode="stretch" />
+                                                    {item.rates != undefined && item.rates != null ?
+                                                        <Text style={{ fontSize: 18, color: AppColor.Gray31, padding: 10 }}>{ToDoAVGFromArray(item.rates)}/10</Text>
+                                                        : null}
+                                                </View>
+                                            </View>
+                                            <View style={{ flexDirection: 'row', gap: 5 }}>
+                                                <View style={{
+                                                    flexDirection: 'row', backgroundColor: AppColor.CyanLight, borderRadius: 12, padding: 5
+                                                    , justifyContent: 'flex-start', alignItems: 'center',
+                                                }}>
+                                                    <Image style={{
+                                                        width: 24, height: 24, borderTopLeftRadius: 5, borderTopRightRadius: 5
+                                                        , padding: 10
+                                                    }}
+                                                        source={require('../../assets/icon/hotel_icon.webp')}
+                                                        resizeMode="stretch" />
+                                                    <Text>{item.Type != 'Khác' ? item.Type : ''}</Text>
+                                                </View>
+                                                <Star size={18} star={item.StarRate} />
+                                            </View>
 
-                                        <View style={{ backgroundColor: AppColor.Snow1, padding: 5 }}>
-                                            {item.type_rooms != undefined ? GetMinDiscountByListTyperoom(item.type_rooms).maxDiscount > 0 ?
-                                                <View style={{ flex: 2, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                                                    <View style={{ flexDirection: 'row', flex: 1, alignItems: 'center' }}>
-                                                        <DiscountShape size="32" color="#FF8A65" />
-                                                        <Text style={{
-                                                            fontSize: 18, fontWeight: 'semibold',
-                                                            color: '#FF8A65'
-                                                        }}>giảm {GetMinDiscountByListTyperoom(item.type_rooms).maxDiscount}%</Text>
-                                                    </View>
-                                                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' }}>
-                                                        <Text style={{
-                                                            color: AppColor.Gray31,
-                                                            fontSize: 10,
-                                                            textDecorationLine: 'line-through',
+                                            <View style={{
+                                                flexDirection: 'row', borderRadius: 12, padding: 10
+                                                , justifyContent: 'flex-start', alignItems: 'flex-start'
+                                            }}>
+                                                <Location size="18" color={AppColor.Gray31} />
+                                                <Text>{item.Address}</Text>
+                                            </View>
+                                            <View style={{
+                                                padding: 10, borderBottomColor: AppColor.Gray01,
+                                                borderBottomWidth: 1.5, borderStyle: 'dotted'
+                                            }}>
+                                                <ScrollView horizontal >
+                                                    {item.convenients?.map((citem, cindex) => (
+                                                        <View key={citem.id} style={{
+                                                            borderRadius: 100, paddingVertical: 2, paddingHorizontal: 5,
                                                             marginRight: 5
-                                                        }}>{item.type_rooms[0].Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
+                                                        }}><Text style={{
+                                                            backgroundColor: AppColor.Gray01, color: AppColor.Gray31,
+                                                            borderRadius: 100, paddingVertical: 2, paddingHorizontal: 5,
+                                                            marginRight: 5
+                                                        }}>{citem.Title}</Text></View>
+                                                    ))}
+                                                </ScrollView>
+
+                                            </View>
+                                            {item.type_rooms != undefined ? checkHaveCancleOrChangeTimeRevice(item.type_rooms).nonePolicy ?
+                                                <View>
+                                                    {checkHaveCancleOrChangeTimeRevice(item.type_rooms).typePay == HinhThucThanhToan_Enum.ThanhToanTrucTiep ?
+                                                        <Text style={{ color: AppColor.Green31 }}>Có {HinhThucThanhToan_Enum.ThanhToanTrucTiep}</Text> : null}
+                                                    {checkHaveCancleOrChangeTimeRevice(item.type_rooms).haveCancle ? <Text style={{ color: AppColor.Green31 }}>Có thể hủy phòng</Text> : null}
+                                                    {checkHaveCancleOrChangeTimeRevice(item.type_rooms).haveChangeTimeRevice ? <Text style={{ color: AppColor.Green31 }}>Có thể đổi lịch</Text> : null}
+                                                </View> : null : null}
+
+                                            <View style={{ backgroundColor: AppColor.Snow1, padding: 5 }}>
+                                                {item.type_rooms != undefined ? GetMinDiscountByListTyperoom(item.type_rooms).maxDiscount > 0 ?
+                                                    <View style={{ flex: 2, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                        <View style={{ flexDirection: 'row', flex: 1, alignItems: 'center' }}>
+                                                            <DiscountShape size="32" color="#FF8A65" />
+                                                            <Text style={{
+                                                                fontSize: 18, fontWeight: 'semibold',
+                                                                color: '#FF8A65'
+                                                            }}>giảm {GetMinDiscountByListTyperoom(item.type_rooms).maxDiscount}%</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' }}>
+                                                            <Text style={{
+                                                                color: AppColor.Gray31,
+                                                                fontSize: 10,
+                                                                textDecorationLine: 'line-through',
+                                                                marginRight: 5
+                                                            }}>{item.type_rooms[0].Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Text>
+                                                            <Text
+                                                                style={{ color: 'red', fontWeight: 'semibold', }}>
+                                                                {(GetMinDiscountByListTyperoom(item.type_rooms).acturPrice - GetMinDiscountByListTyperoom(item.type_rooms).acturPrice * GetMinDiscountByListTyperoom(item.type_rooms).maxDiscount / 100).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Text>
+                                                        </View>
+
+                                                    </View> :
+                                                    <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' }}>
                                                         <Text
                                                             style={{ color: 'red', fontWeight: 'semibold', }}>
-                                                            {(GetMinDiscountByListTyperoom(item.type_rooms).acturPrice - GetMinDiscountByListTyperoom(item.type_rooms).acturPrice * GetMinDiscountByListTyperoom(item.type_rooms).maxDiscount / 100).toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Text>
+                                                            {item.type_rooms[0].Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Text>
                                                     </View>
+                                                    : null}
+                                            </View>
 
-                                                </View> :
-                                                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'flex-start' }}>
-                                                    <Text
-                                                        style={{ color: 'red', fontWeight: 'semibold', }}>
-                                                        {item.type_rooms[0].Price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} </Text>
-                                                </View>
-                                                : null}
+
                                         </View>
-
-
                                     </View>
-                                </View>
-                            </TouchableOpacity>
-                        )) : <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-                            <Image style={{ width: 100, height: 100, borderRadius: 5 }}
-                                source={require('../../assets/loading.png')} />
-                        </View>}
+                                </TouchableOpacity>
+                            )) : <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+                                <Image style={{ width: 100, height: 100, borderRadius: 5 }}
+                                    source={require('../../assets/loading.png')} />
+                            </View>}
                     </View>
                 </ScrollView>
             </View>

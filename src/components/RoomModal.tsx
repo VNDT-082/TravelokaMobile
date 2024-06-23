@@ -25,7 +25,7 @@ export default function RoomModal(props: IPops) {
     const [errorDes, setErrorDes] = useState<string>('')
     const [typeNotify, setTypeNotify] = useState<'Error' | 'Sucsess' | 'Warning'>('Sucsess')
     return (
-        <View>
+        <View style={{ zIndex: 100 }}>
             {/* <TouchableOpacity >
             <Text>Chọn địa điểm đặt phòng</Text>
         </TouchableOpacity> */}
@@ -496,6 +496,7 @@ export default function RoomModal(props: IPops) {
                                                             borderRadius: 5
                                                         }}
                                                             onPress={() => {
+                                                                setRoomModalState(false);
                                                                 navigation.navigate('BookingHotel', { idRoom: item?.id })
                                                             }}>Đặt phòng này</Text>
                                                     </TouchableOpacity>

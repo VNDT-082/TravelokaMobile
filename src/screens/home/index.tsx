@@ -50,6 +50,7 @@ const HomeScreen = () => {
     useEffect(() => {
         setIsLoading(true);
         GetListProvinceDefault().then((response) => {
+            console.log('GetListProvinceDefault', response);
             if (response != false && response != undefined) {
                 console.log('response_s0', response)
                 setListProvince(response);
