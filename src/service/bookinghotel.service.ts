@@ -30,6 +30,7 @@ export const createBookingHotel = async (body: BookingHotel_Model): Promise<any>
 
 export const getListBookingByGusetId = async (guestId: string): Promise<any> => {
     try {
+
         const response = await http.get<string>(`booking-hotel/get-list-booking-by-guest-id?id=${guestId}`
         );
         if (response.status === 200) {

@@ -80,10 +80,11 @@ const CartScreen = () => {
     const getData = async () => {
         if (userGuest?.id != undefined) {
             setLoadingBookingState(true);
+            console.log('reponseHistory');
             const reponseHistory = await getListBookingByGusetId(userGuest?.id)
                 .then(response => {
-                    console.log('reponseHistory', response.result)
-                    setListBookingHotel(response.result)
+                    console.log('reponseHistory', response);
+                    setListBookingHotel(response.result);
 
                 }).catch((err) => {
                     setModalErrValue('Lỗi truy cập vui lòng thử lại')

@@ -59,6 +59,7 @@ export default function PayModal(props: IProps) {
                 GiftCode: discountCode,
                 GiftCodePrice: discountPrice,
                 VAT: thueVAT,
+                totalRoom: TotalRoom,
                 members: listMember,
                 room: null
             }
